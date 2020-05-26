@@ -82,7 +82,7 @@
 <meta name="description" content="在多线程环境下，比如在spring容器类中定义的变量，如何防止自己的变量被其它线程篡改。想要解决这个问题，不得不提到一个类：ThreadLocal ThreadLocal的业务场景是什么？我们怎么用好这个类？你知道ThreadLocal的内存泄漏吗？当我们知道ThreadLocal的原理之后，这个问题也会迎刃而解。 我们首先看一下ThreadLocal的常用Api实现 set过程  1234567">
 <meta property="og:type" content="article">
 <meta property="og:title" content="浅嗑ThreadLocal之内存泄漏">
-<meta property="og:url" content="https://shuai1763957837.github.io/2020/05/26/%E6%B5%85%E5%97%91ThreadLocal%E4%B9%8B%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/index.html">
+<meta property="og:url" content="https://shuai1763957837.github.io/2020/05/07/%E6%B5%85%E5%97%91ThreadLocal%E4%B9%8B%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/index.html">
 <meta property="og:site_name" content="codingfaker">
 <meta property="og:description" content="在多线程环境下，比如在spring容器类中定义的变量，如何防止自己的变量被其它线程篡改。想要解决这个问题，不得不提到一个类：ThreadLocal ThreadLocal的业务场景是什么？我们怎么用好这个类？你知道ThreadLocal的内存泄漏吗？当我们知道ThreadLocal的原理之后，这个问题也会迎刃而解。 我们首先看一下ThreadLocal的常用Api实现 set过程  1234567">
 <meta property="og:locale" content="en_US">
@@ -92,8 +92,8 @@
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/23/1724115ae0fa041d?w=941&h=474&f=png&s=235473">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/23/17241266810ed456?w=964&h=444&f=png&s=168182">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/23/172414f2925a14c0?w=1372&h=658&f=png&s=318983">
-<meta property="article:published_time" content="2020-05-26T02:17:27.875Z">
-<meta property="article:modified_time" content="2020-05-26T02:17:27.875Z">
+<meta property="article:published_time" content="2020-05-07T05:32:00.000Z">
+<meta property="article:modified_time" content="2020-05-07T05:32:00.000Z">
 <meta property="article:author" content="shuaizx">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/5/22/1723ba4192aef168?w=647&h=411&f=png&s=97700">
@@ -126,7 +126,7 @@
 
 
 
-  <link rel="canonical" href="https://shuai1763957837.github.io/2020/05/26/浅嗑ThreadLocal之内存泄漏/"/>
+  <link rel="canonical" href="https://shuai1763957837.github.io/2020/05/07/浅嗑ThreadLocal之内存泄漏/"/>
 
 
 
@@ -239,7 +239,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://shuai1763957837.github.io/2020/05/26/%E6%B5%85%E5%97%91ThreadLocal%E4%B9%8B%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/">
+    <link itemprop="mainEntityOfPage" href="https://shuai1763957837.github.io/2020/05/07/%E6%B5%85%E5%97%91ThreadLocal%E4%B9%8B%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="shuaizx">
@@ -268,8 +268,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-05-26T10:17:27+08:00">
-                2020-05-26
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-05-07T13:32:00+08:00">
+                2020-05-07
               </time>
             
 
@@ -412,7 +412,7 @@ ThreadLocalMap内部又是一个继承了弱引用的ThreadLocal的entry数组</
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2020/05/26/%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E4%B9%8BCompleTableFuture/" rel="next" title="异步编程之CompleTableFuture">
+              <a href="/2020/04/29/%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E4%B9%8BCompleTableFuture/" rel="next" title="异步编程之CompleTableFuture">
                 <i class="fa fa-chevron-left"></i> 异步编程之CompleTableFuture
               </a>
             
@@ -422,7 +422,7 @@ ThreadLocalMap内部又是一个继承了弱引用的ThreadLocal的entry数组</
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2020/05/26/%E5%AF%B9%E8%B1%A1%E4%B8%80%E5%AE%9A%E5%9C%A8%E5%A0%86%E4%B8%8A%E5%88%86%E9%85%8D%E5%90%97%EF%BC%9F%E8%AE%BA%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90%E3%80%81%E6%A0%88%E4%B8%8A%E5%88%86%E9%85%8D%E3%80%81%E6%A0%87%E9%87%8F%E6%9B%BF%E6%8D%A2%E5%92%8C%E9%94%81%E6%B6%88%E9%99%A4/" rel="prev" title="对象一定在堆上分配吗？论逃逸分析、栈上分配、标量替换和锁消除">
+              <a href="/2020/05/19/%E5%AF%B9%E8%B1%A1%E4%B8%80%E5%AE%9A%E5%9C%A8%E5%A0%86%E4%B8%8A%E5%88%86%E9%85%8D%E5%90%97%EF%BC%9F%E8%AE%BA%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90%E3%80%81%E6%A0%88%E4%B8%8A%E5%88%86%E9%85%8D%E3%80%81%E6%A0%87%E9%87%8F%E6%9B%BF%E6%8D%A2%E5%92%8C%E9%94%81%E6%B6%88%E9%99%A4/" rel="prev" title="对象一定在堆上分配吗？论逃逸分析、栈上分配、标量替换和锁消除">
                 对象一定在堆上分配吗？论逃逸分析、栈上分配、标量替换和锁消除 <i class="fa fa-chevron-right"></i>
               </a>
             
@@ -490,7 +490,7 @@ ThreadLocalMap内部又是一个继承了弱引用的ThreadLocal的entry数组</
             
               <div class="site-state-item site-state-posts">
               
-                <a href="/archives/%7C%7Carchive">
+                <a href="/archives/%7C%7C%20archive">
               
                   <span class="site-state-item-count">4</span>
                   <span class="site-state-item-name">posts</span>
