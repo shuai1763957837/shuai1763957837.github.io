@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="在多线程环境下，比如在spring容器类中定义的变量，如何防止自己的变量被其它线程篡改。想要解决这个问题，不得不提到一个类：ThreadLocal ThreadLocal的业务场景是什么？我们怎么用好这个类？你知道ThreadLocal的内存泄漏吗？当我们知道ThreadLocal的原理之后，这个问题也会迎刃而解。 我们首先看一下ThreadLocal的常用Api实现 set过程  1234567">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅嗑ThreadLocal之内存泄漏">
+<meta property="og:url" content="https://shuai1763957837.github.io/2020/05/26/%E6%B5%85%E5%97%91ThreadLocal%E4%B9%8B%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/index.html">
+<meta property="og:site_name" content="CodingFaker">
+<meta property="og:description" content="在多线程环境下，比如在spring容器类中定义的变量，如何防止自己的变量被其它线程篡改。想要解决这个问题，不得不提到一个类：ThreadLocal ThreadLocal的业务场景是什么？我们怎么用好这个类？你知道ThreadLocal的内存泄漏吗？当我们知道ThreadLocal的原理之后，这个问题也会迎刃而解。 我们首先看一下ThreadLocal的常用Api实现 set过程  1234567">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/22/1723ba4192aef168?w=647&h=411&f=png&s=97700">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/23/1723fb66779b0660?w=714&h=403&f=png&s=160405">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/23/172410fa2893fa38?w=876&h=499&f=png&s=222924">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/23/1724115ae0fa041d?w=941&h=474&f=png&s=235473">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/23/17241266810ed456?w=964&h=444&f=png&s=168182">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/23/172414f2925a14c0?w=1372&h=658&f=png&s=318983">
+<meta property="article:published_time" content="2020-05-26T02:17:27.875Z">
+<meta property="article:modified_time" content="2020-05-26T02:17:27.875Z">
+<meta property="article:author" content="shuaizx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/5/22/1723ba4192aef168?w=647&h=411&f=png&s=97700">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://shuai1763957837.github.io/2020/05/26/浅嗑ThreadLocal之内存泄漏/"/>
+
+
+
+
+
+  <title>浅嗑ThreadLocal之内存泄漏 | CodingFaker</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CodingFaker</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://shuai1763957837.github.io/2020/05/26/%E6%B5%85%E5%97%91ThreadLocal%E4%B9%8B%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="shuaizx">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CodingFaker">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">浅嗑ThreadLocal之内存泄漏</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-05-26T10:17:27+08:00">
+                2020-05-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在多线程环境下，比如在spring容器类中定义的变量，如何防止自己的变量被其它线程篡改。想要解决这个问题，不得不提到一个类：ThreadLocal</p>
+<p>ThreadLocal的业务场景是什么？我们怎么用好这个类？你知道ThreadLocal的内存泄漏吗？当我们知道ThreadLocal的原理之后，这个问题也会迎刃而解。</p>
+<p>我们首先看一下ThreadLocal的常用Api实现</p>
+<p><strong>set过程</strong></p>
+<hr>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public void set(T value) &#123;</span><br><span class="line">    Thread t &#x3D; Thread.currentThread();</span><br><span class="line">    ThreadLocalMap map &#x3D; getMap(t);</span><br><span class="line">    if (map !&#x3D; null)</span><br><span class="line">        map.set(this, value);</span><br><span class="line">    else</span><br><span class="line">        createMap(t, value);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>步骤讲解</p>
+<ol>
+<li>首先获取当前线程</li>
+<li>getMap是指从当前线程中获取到线程的threadLocals，threadLocals是线程中的一个静态内部类ThreadLocalMap<br>变量为threadLocals<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ThreadLocalMap getMap(Thread t) &#123;</span><br><span class="line">    return t.threadLocals;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ThreadLocal.ThreadLocalMap threadLocals &#x3D; null;</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>判断获取到的threadLocals是否为空，不为空插入数据，this为当前Threadlocal对象，value为设置的值，set过程过还伴随着清除的过程，若空间不够，还会对全部的entry进行扫描清除，进行resize</li>
+<li>否则创建threadLocals并设置值，<br>创建ThreadLocalMap过程<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">void createMap(Thread t, T firstValue) &#123;</span><br><span class="line">    t.threadLocals &#x3D; new ThreadLocalMap(this, firstValue);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+ThreadLocalMap内部又是一个继承了弱引用的ThreadLocal的entry数组</li>
+</ol>
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/22/1723ba4192aef168?w=647&h=411&f=png&s=97700" alt=""></p>
+<p>new ThreadLocalMap(this, firstValue) 的过程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ThreadLocalMap(ThreadLocal&lt;?&gt; firstKey, Object firstValue) &#123;</span><br><span class="line">    table &#x3D; new Entry[INITIAL_CAPACITY];</span><br><span class="line">    int i &#x3D; firstKey.threadLocalHashCode &amp; (INITIAL_CAPACITY - 1);</span><br><span class="line">    table[i] &#x3D; new Entry(firstKey, firstValue);</span><br><span class="line">    size &#x3D; 1;</span><br><span class="line">    setThreshold(INITIAL_CAPACITY);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先初识化一个Entry数组，entry的key持有ThreadLocal的弱引用，简单介绍一下，弱引用会在jvm发生gc时没有其他强引用关联时而断开弱引用链进行垃圾回收。稍后我会对这个情况进行分析。其次通过threadLocalHashCode找到在entry中的位置，放入到entry中，最后初始化threshold，超过threshold即2/3自动扩容</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">setThreshold(INITIAL_CAPACITY);</span><br><span class="line"></span><br><span class="line">  private void setThreshold(int len) &#123;</span><br><span class="line">            threshold &#x3D; len * 2 &#x2F; 3;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p>归纳一下上面的流程，简要的来说就是ThreadLocal只是一个符号，并不存储任何值，通过当前线程中的ThreadLocalMap存储值，ThreadLocalMap中有一个entry数组，entry数组继承弱引用，在entry放入key，value时，entry会调用父类的构造方法，意思就是entry的key只持有ThreadLocal的弱引用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Entry(ThreadLocal&lt;?&gt; k, Object v) &#123;</span><br><span class="line">    super(k);</span><br><span class="line">    value &#x3D; v;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>找到一张著名的网图说明一下这个关系链</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/23/1723fb66779b0660?w=714&h=403&f=png&s=160405" alt=""></p>
+<p><strong>get过程</strong></p>
+<hr>
+<p>在我们熟悉set过程之后，get过程更好理解了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public T get() &#123;</span><br><span class="line">    Thread t &#x3D; Thread.currentThread();</span><br><span class="line">    ThreadLocalMap map &#x3D; getMap(t);</span><br><span class="line">    if (map !&#x3D; null) &#123;</span><br><span class="line">        ThreadLocalMap.Entry e &#x3D; map.getEntry(this);</span><br><span class="line">        if (e !&#x3D; null) &#123;</span><br><span class="line">            @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">            T result &#x3D; (T)e.value;</span><br><span class="line">            return result;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return setInitialValue();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>首先获取当前线程</li>
+<li>获取到当前线程的ThreadLocalMap</li>
+<li>判断ThreadLocalMap是否为null，为null则跳到第6步初始化</li>
+<li>获取当前threadLocalHashCode对应的entry值</li>
+<li>返回entry的value值，就是在业务中往ThreadLocal设置的那个值</li>
+<li>若为null，初始化值<br>看一下初始化值的操作<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">private T setInitialValue() &#123;</span><br><span class="line">    T value &#x3D; initialValue();</span><br><span class="line">    Thread t &#x3D; Thread.currentThread();</span><br><span class="line">    ThreadLocalMap map &#x3D; getMap(t);</span><br><span class="line">    if (map !&#x3D; null)</span><br><span class="line">        map.set(this, value);</span><br><span class="line">    else</span><br><span class="line">        createMap(t, value);</span><br><span class="line">    return value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+上面段代码简要分析就是初始化值，initialValue返回固定返回一个null，然后下面几段代码在get方法中已经分析了，这里就不在分析。总之就是把null放到entry的value位置，返回null。</li>
+</ol>
+<p>需要注意的是在map.getEntry(this);这里的时候，还额外做了一个操作，就是判断获取到的entry或者entry的key是否为null，因为ThreadLocalMap使用线性地址法存储值，所以还需要依次找下去，直到entry为空为止，并清除掉key为空的entry<br>getEntryAfterMiss(key, i, e)，核心的清除算法见文底，也可以看尾部其他作者讲解threadLocal的详细源码过程。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">private Entry getEntry(ThreadLocal&lt;?&gt; key) &#123;</span><br><span class="line">    int i &#x3D; key.threadLocalHashCode &amp; (table.length - 1);</span><br><span class="line">    Entry e &#x3D; table[i];</span><br><span class="line">    if (e !&#x3D; null &amp;&amp; e.get() &#x3D;&#x3D; key)</span><br><span class="line">        return e;</span><br><span class="line">    else</span><br><span class="line">        return getEntryAfterMiss(key, i, e);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>remove过程</strong></p>
+<hr>
+<p>remove相对于其他两个方法比较简单,核心方法如下所示</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">private void remove(ThreadLocal&lt;?&gt; key) &#123;</span><br><span class="line">    Entry[] tab &#x3D; table;</span><br><span class="line">    int len &#x3D; tab.length;</span><br><span class="line">    int i &#x3D; key.threadLocalHashCode &amp; (len-1);</span><br><span class="line">    for (Entry e &#x3D; tab[i];</span><br><span class="line">         e !&#x3D; null;</span><br><span class="line">         e &#x3D; tab[i &#x3D; nextIndex(i, len)]) &#123;</span><br><span class="line">        if (e.get() &#x3D;&#x3D; key) &#123;</span><br><span class="line">            e.clear();</span><br><span class="line">            expungeStaleEntry(i);</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>找到threadLocalHashCode所在的位置，也就是threadLocal在entry中的位置</li>
+<li>因为Entry是以线地址法解决冲突而放进去的值，所以需要沿着线遍历找到正确的值</li>
+<li>清除threadlocal的引用</li>
+<li>对后续的值进行段式清除</li>
+</ol>
+<p>其中主要的是expungeStaleEntry这个方法，这也是get、set方式清除无效引用的核心方法，以下解析截取自<a href="https://www.cnblogs.com/micrari/p/6790229.html" target="_blank" rel="noopener">https://www.cnblogs.com/micrari/p/6790229.html</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * 这个函数是ThreadLocal中核心清理函数，它做的事情很简单：</span><br><span class="line"> * 就是从staleSlot开始遍历，将无效（弱引用指向对象被回收）清理，即对应entry中的value置为null，将指向这个entry的table[i]置为null，直到扫到空entry。</span><br><span class="line"> * 另外，在过程中还会对非空的entry作rehash。</span><br><span class="line"> * 可以说这个函数的作用就是从staleSlot开始清理连续段中的slot（断开强引用，rehash slot等）</span><br><span class="line"> *&#x2F;</span><br><span class="line">private int expungeStaleEntry(int staleSlot) &#123;</span><br><span class="line">    Entry[] tab &#x3D; table;</span><br><span class="line">    int len &#x3D; tab.length;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 因为entry对应的ThreadLocal已经被回收，value设为null，显式断开强引用</span><br><span class="line">    tab[staleSlot].value &#x3D; null;</span><br><span class="line">    &#x2F;&#x2F; 显式设置该entry为null，以便垃圾回收</span><br><span class="line">    tab[staleSlot] &#x3D; null;</span><br><span class="line">    size--;</span><br><span class="line"></span><br><span class="line">    Entry e;</span><br><span class="line">    int i;</span><br><span class="line">    for (i &#x3D; nextIndex(staleSlot, len); (e &#x3D; tab[i]) !&#x3D; null; i &#x3D; nextIndex(i, len)) &#123;</span><br><span class="line">        ThreadLocal&lt;?&gt; k &#x3D; e.get();</span><br><span class="line">        &#x2F;&#x2F; 清理对应ThreadLocal已经被回收的entry</span><br><span class="line">        if (k &#x3D;&#x3D; null) &#123;</span><br><span class="line">            e.value &#x3D; null;</span><br><span class="line">            tab[i] &#x3D; null;</span><br><span class="line">            size--;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            &#x2F;*</span><br><span class="line">             * 对于还没有被回收的情况，需要做一次rehash。</span><br><span class="line">             * </span><br><span class="line">             * 如果对应的ThreadLocal的ID对len取模出来的索引h不为当前位置i，</span><br><span class="line">             * 则从h向后线性探测到第一个空的slot，把当前的entry给挪过去。</span><br><span class="line">             *&#x2F;</span><br><span class="line">            int h &#x3D; k.threadLocalHashCode &amp; (len - 1);</span><br><span class="line">            if (h !&#x3D; i) &#123;</span><br><span class="line">                tab[i] &#x3D; null;</span><br><span class="line">                </span><br><span class="line">                &#x2F;*</span><br><span class="line">                 * 在原代码的这里有句注释值得一提，原注释如下：</span><br><span class="line">                 *</span><br><span class="line">                 * Unlike Knuth 6.4 Algorithm R, we must scan until</span><br><span class="line">                 * null because multiple entries could have been stale.</span><br><span class="line">                 *</span><br><span class="line">                 * 这段话提及了Knuth高德纳的著作TAOCP（《计算机程序设计艺术》）的6.4章节（散列）</span><br><span class="line">                 * 中的R算法。R算法描述了如何从使用线性探测的散列表中删除一个元素。</span><br><span class="line">                 * R算法维护了一个上次删除元素的index，当在非空连续段中扫到某个entry的哈希值取模后的索引</span><br><span class="line">                 * 还没有遍历到时，会将该entry挪到index那个位置，并更新当前位置为新的index，</span><br><span class="line">                 * 继续向后扫描直到遇到空的entry。</span><br><span class="line">                 *</span><br><span class="line">                 * ThreadLocalMap因为使用了弱引用，所以其实每个slot的状态有三种也即</span><br><span class="line">                 * 有效（value未回收），无效（value已回收），空（entry&#x3D;&#x3D;null）。</span><br><span class="line">                 * 正是因为ThreadLocalMap的entry有三种状态，所以不能完全套高德纳原书的R算法。</span><br><span class="line">                 *</span><br><span class="line">                 * 因为expungeStaleEntry函数在扫描过程中还会对无效slot清理将之转为空slot，</span><br><span class="line">                 * 如果直接套用R算法，可能会出现具有相同哈希值的entry之间断开（中间有空entry）。</span><br><span class="line">                 *&#x2F;</span><br><span class="line">                while (tab[h] !&#x3D; null) &#123;</span><br><span class="line">                    h &#x3D; nextIndex(h, len);</span><br><span class="line">                &#125;</span><br><span class="line">                tab[h] &#x3D; e;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F; 返回staleSlot之后第一个空的slot索引</span><br><span class="line">    return i;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>ThreadLocal的常见问题</strong></p>
+<hr>
+<ol>
+<li>gc后key一定会为null吗，get为什么还可以获取到值</li>
+</ol>
+<p>在我们使用ThreadLocal的时候，常使用全局的final static来修饰ThreadLocal变量,这种变量的生命周期和jvm一样长，存放在jvm的方法区内，会一直保持有保持对ThreadLocal的强引用，所有不管jvm何时gc，只要我们持有这种引用关系，ThreadLocal就不会被回收，ThreadLocal不被回收，弱引用关系自然也存在，我们也就可以获取到他的值。举个String类型的弱引用看一下就可以很清楚的明白这个关系,ThreadLocal道理也是如此</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">WeakReference&lt;String&gt; staticString&#x3D;new WeakReference&lt;&gt;(test);</span><br><span class="line">WeakReference&lt;String&gt; ordinaryString&#x3D;new WeakReference&lt;&gt;(new String(&quot;ordinaryString&quot;));</span><br><span class="line">System.out.println(staticString.get());</span><br><span class="line">System.out.println(ordinaryString.get());</span><br><span class="line">System.gc();</span><br><span class="line">System.out.println(staticString.get());</span><br><span class="line">System.out.println(ordinaryString.get());</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/23/172410fa2893fa38?w=876&h=499&f=png&s=222924" alt=""><br>2. 为什么ThreadLocalMap内部是entry数组，而不是单个entry</p>
+<p>因为在一个线程中，不止我们使用的ThreadLocal，还存在其他地方设置的ThreadLocal，比如Tomcat内，在idea环境中看一下实际情况</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/23/1724115ae0fa041d?w=941&h=474&f=png&s=235473" alt=""><br>在我们还没有设置ThreadLocal自己的值的时候，在线程内已经存在了三个ThreadLocal设置的值，所有说需要我们用一个Entry数组来接收不同的ThreadLocal对象设置的值<br>3. 为什么ThreadLocalMap中的Entry不用强引用，而继承WeakReference</p>
+<p>因为在我们开发过程中，经常使用线程池进行线程的链接复用，如果用强引用的话，会造成我们已经离开的ThreadLocaL变量的作用域，而ThreadLoca却迟迟得不到回收，下面我通过画一张图来说明这个情况<br><img src="https://user-gold-cdn.xitu.io/2020/5/23/17241266810ed456?w=964&h=444&f=png&s=168182" alt=""><br>若使用强引用方式，在ThreadLocal ref断开之后，但是entry中的key和ThreadLocal对象的引用却没有断开，在之后也没有对ThreadLocal进行remove，在后续线程不进行使用或者不正确的使用下，则会发生内存泄漏或者数据混乱</p>
+<ol start="4">
+<li>真的会内存泄漏吗</li>
+</ol>
+<p>在正常情况下，我们对线程池进行使用，在对在ThreadLocal进行set、get时ThreadLocalMap内部都会对entry数组进行expungeStaleEntry操作，在扩容时还会进行全量清除，在网上的篇子中常说会持有 当前线程-&gt;当前线程的threadLocals(ThreadLocal.ThreadLocalMap对象）-&gt;Entry数组-&gt;某个entry.value】，并且key为null的情况，但是在同一个线程对同一个ThreadLocal进行expungeStaleEntry会自我清理，在set的时候又会重新设置进这个位置，key为null的情况又被还原了，因为threadLocalHashCode在同一个ThreadLocal对象下值不会变。除非线程池线程不在使用，或者ThreadLocalMap无法扩容或者无法遍历到entry中这个位置，这种情况下才会发生内存泄漏，但是为了安全，请保持好良好的编码习惯，及时remove<br>5. 为什么会数据混乱</p>
+<p>在我们对ThreadLocal进行使用的时候，没有良好的编码习惯，对ThreadLocal没有进行remove，并且在进行逻辑判断的时候还意外的进入了get方法内，没有进行set，这个时候就会把上次设置进的值重新取出来，造成数据的紊乱。举个列子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">        ThreadPoolExecutor threadPoolExecutor &#x3D; new ThreadPoolExecutor(1, 1, 10, TimeUnit.SECONDS, new ArrayBlockingQueue(10));</span><br><span class="line">        &#x2F;&#x2F;i代值不同的用户</span><br><span class="line">        for (int i&#x3D;0;i&lt;5;i++)&#123;</span><br><span class="line">            threadPoolExecutor.execute(()-&gt;&#123;</span><br><span class="line">                String name &#x3D; Thread.currentThread().getName();</span><br><span class="line">                System.out.println(name);</span><br><span class="line">                if(Math.random()&gt;0.6)&#123;</span><br><span class="line">                    threadLocal.set((int)(Math.random()*1000000));</span><br><span class="line">                    System.out.println(threadLocal.get());</span><br><span class="line">                &#125;else &#123;</span><br><span class="line">                    System.out.println(threadLocal.get());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/23/172414f2925a14c0?w=1372&h=658&f=png&s=318983" alt=""><br>只取一个线程，代表复用这个线程，不断的执行业务代码，当我们第一次进入到(int)(Math.random()*1000000)的时候，设置进了值，但是我们没有remove，在下次判断的时候又没有进入set里面，导致还是取用了上次的值，导致数据混乱，所以说还是要养成良好的编码习惯，及时remove</p>
+<p>以下是我看过的最精彩的一篇ThreadLocal源码文章，详细讲解了阶段清除和全量清除的步骤：</p>
+<p>参考文章：<a href="https://www.cnblogs.com/micrari/p/6790229.html" target="_blank" rel="noopener">https://www.cnblogs.com/micrari/p/6790229.html</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/26/%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E4%B9%8BCompleTableFuture/" rel="next" title="异步编程之CompleTableFuture">
+                <i class="fa fa-chevron-left"></i> 异步编程之CompleTableFuture
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/05/26/%E5%AF%B9%E8%B1%A1%E4%B8%80%E5%AE%9A%E5%9C%A8%E5%A0%86%E4%B8%8A%E5%88%86%E9%85%8D%E5%90%97%EF%BC%9F%E8%AE%BA%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90%E3%80%81%E6%A0%88%E4%B8%8A%E5%88%86%E9%85%8D%E3%80%81%E6%A0%87%E9%87%8F%E6%9B%BF%E6%8D%A2%E5%92%8C%E9%94%81%E6%B6%88%E9%99%A4/" rel="prev" title="对象一定在堆上分配吗？论逃逸分析、栈上分配、标量替换和锁消除">
+                对象一定在堆上分配吗？论逃逸分析、栈上分配、标量替换和锁消除 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">shuaizx</p>
+              <p class="site-description motion-element" itemprop="description">java</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shuaizx</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

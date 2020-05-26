@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="什么是索引，为什么要索引，这是熟悉数据库必不可少的知识。简单的来说，索引就是利用合理的数据结构来提高查询数据的效率。让我们通过这种数据结构而快速的找到我们想要的数据。 常见的索引模型  从数据结构来说有B+树索引、hash索引、FULLTEXT索引、R-Tree索引，此处介绍hash索引和b+树索引  hash索引   hash索引顾名思义就是利用key-value存储数据的一种结构，只需要我们输">
+<meta property="og:type" content="article">
+<meta property="og:title" content="初识mysql索引">
+<meta property="og:url" content="https://shuai1763957837.github.io/2020/05/26/%E5%88%9D%E8%AF%86mysql%E7%B4%A2%E5%BC%95/index.html">
+<meta property="og:site_name" content="CodingFaker">
+<meta property="og:description" content="什么是索引，为什么要索引，这是熟悉数据库必不可少的知识。简单的来说，索引就是利用合理的数据结构来提高查询数据的效率。让我们通过这种数据结构而快速的找到我们想要的数据。 常见的索引模型  从数据结构来说有B+树索引、hash索引、FULLTEXT索引、R-Tree索引，此处介绍hash索引和b+树索引  hash索引   hash索引顾名思义就是利用key-value存储数据的一种结构，只需要我们输">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/11/17203d23dd21f6d0?w=596&h=391&f=png&s=73224">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/11/17203da298ad1acc?w=640&h=263&f=png&s=52058">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/11/17203e069ac2266c?w=761&h=492&f=png&s=29646">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/11/17203ed42f1f45c1?w=633&h=461&f=png&s=93983">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/172069a53f723ce3?w=1208&h=427&f=png&s=104846">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/11/172044f5f5816e41?w=1142&h=856&f=png&s=169650">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/11/17204596f283eca9?w=802&h=357&f=png&s=50469">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/172067fbd38b9536?w=647&h=724&f=png&s=379308">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/17206842a09bd940?w=487&h=733&f=png&s=135581">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/17206881cc0d135e?w=1028&h=729&f=png&s=239197">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/172078c6496f50cf?w=884&h=325&f=png&s=65749">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/1720784936935385?w=780&h=329&f=png&s=53546">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/17207a39806cfad3?w=530&h=393&f=png&s=83545">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/17207a5e888c8096?w=519&h=370&f=png&s=86693">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/17207af14640a33a?w=913&h=383&f=png&s=71353">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/17207b146b1fa70d?w=842&h=325&f=png&s=58984">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/17207b701b7886d0?w=1142&h=856&f=png&s=269026">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/17207ec39b9cc2a0?w=505&h=315&f=png&s=41065">
+<meta property="article:published_time" content="2020-05-26T02:15:19.868Z">
+<meta property="article:modified_time" content="2020-05-26T02:15:23.618Z">
+<meta property="article:author" content="shuaizx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/5/11/17203d23dd21f6d0?w=596&h=391&f=png&s=73224">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://shuai1763957837.github.io/2020/05/26/初识mysql索引/"/>
+
+
+
+
+
+  <title>初识mysql索引 | CodingFaker</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CodingFaker</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://shuai1763957837.github.io/2020/05/26/%E5%88%9D%E8%AF%86mysql%E7%B4%A2%E5%BC%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="shuaizx">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CodingFaker">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">初识mysql索引</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-05-26T10:15:19+08:00">
+                2020-05-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>什么是索引，为什么要索引，这是熟悉数据库必不可少的知识。简单的来说，<strong>索引就是利用合理的数据结构来提高查询数据的效率</strong>。让我们通过这种数据结构而快速的找到我们想要的数据。</p>
+<p><strong>常见的索引模型</strong></p>
+<hr>
+<p>从数据结构来说有B+树索引、hash索引、FULLTEXT索引、R-Tree索引，此处介绍hash索引和b+树索引</p>
+<ul>
+<li><p>hash索引</p>
+<p>  hash索引顾名思义就是利用key-value存储数据的一种结构，只需要我们输入key，就能找到匹配的value，hash索引常用来匹配等值查询的场景，在mysql中MEMORY默认使用哈希索引。MEMORY用到的很少，因为它是把数据存到内存中，如果内存出现异常就会影响数据。如果重启或者关机，所有数据都会消失，不过在真实业务中key-value的查询常用nosql数据库来进行存储，此处不过多介绍。</p>
+</li>
+<li><p>B+树索引</p>
+<p>  b+树索引是innodb中b—tree索引的实现，为什么用B+树作为innodb索引的实现呢？因为磁盘的存储原理决定了b+树是最适合它的存储模型。</p>
+</li>
+</ul>
+<pre><code>在innodb中磁盘以页为单位，一页等于16K，我们访问磁盘的时候访问的是逻辑分区，机器扫描计算机对应的物理分区。随机io的时候扫描不同的磁盘需要磁头不停的移动，我们需要的数据可能分布在不同的页中，在没有任何索引的数据库中寻找数据，此时数据库相当于一个文件系统，需要cpu进行全表扫描。而b+树的一棵树对应innodb的一页，我们每次访问数据库只需要加载对应的页，从树的节点一直找下去，在固定的次数总会在叶子节点找到响应的数据，b+这种数据结构完美的契合了innodb这种以页为单位的存储引擎。下图为无索引情况下全图扫描</code></pre><p><img src="https://user-gold-cdn.xitu.io/2020/5/11/17203d23dd21f6d0?w=596&h=391&f=png&s=73224" alt=""></p>
+<p>  <strong>为什么不用b树作为innodb索引的数据结构？</strong></p>
+<hr>
+<p>先看一下b树的数据结构模型</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/11/17203da298ad1acc?w=640&h=263&f=png&s=52058" alt=""></p>
+<p>在b树这种数据结构中，数据存储在节点之内，在查找数据的时候运气好可以快速在前面的节点中找到，但是，当数据是范围查询的时候，数据分配在不同的节点，cpu会进行多次io来遍历节点来进行查找数据，此时性能会极速下降。b树存在不稳定的查询性能。</p>
+<p>重点，innodb的b-tree实现，b+树，先看图<br><img src="https://user-gold-cdn.xitu.io/2020/5/11/17203e069ac2266c?w=761&h=492&f=png&s=29646" alt=""></p>
+<p>在b+树这种数据结构中，数据都存储在叶子中，非叶子结构存储着数据的指针，数据的左节点都比自己小，右节点都大于等于自己。底层的叶子节点数据头尾用链表串联起来。这种数据每次查询的次数稳定，范围查询时在底层用链表顺序查询，大大提高的查询效率。</p>
+<p><strong>b+树与b树比较</strong></p>
+<ul>
+<li>单一节点存储的元素更多，使得查询的IO次数更少，所以也就使得它更适合做为数据库MySQL的底层数据结构了。</li>
+<li>所有的查询都要查找到叶子节点，查询性能是稳定的，而B树，每个节点都可以查找到数据，所以不稳定。</li>
+<li>所有的叶子节点形成了一个有序链表，更加便于查找。</li>
+</ul>
+<p><strong>从索引类型上来看索引又分为聚簇索引和非聚簇索引</strong></p>
+<p> 聚簇索引简单的来说就是所有的辅助索引都需要通过查找主键索引，从而查询真实数据的一个过程。而非聚簇索引中主键索引和辅助索引在叶子节点中都存储着数据的指针。需要查询真实的物理指针才能找到真实的数据。聚簇索引的代表是innodb，非聚簇索引的代表是myisam。</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/11/17203ed42f1f45c1?w=633&h=461&f=png&s=93983" alt=""></p>
+<p>在聚簇索引中主键索引叶子节点存储的是数据，既是索引又是文件。innodb牺牲了空间换取了时间。而非聚簇索引牺牲时间换空间。</p>
+<p><strong>索引的选择</strong></p>
+<hr>
+<p>只要我们建立了索引，数据库优化的时候肯定会利用到索引吗？并不是，在mysql server层优化器进行选择的时候，会对索引进行一个采样，若cardinality太小,优化器不会利用到索引，会进行全表扫描。优化器索引规则查询sql如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">show index from &lt;table&gt;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/172069a53f723ce3?w=1208&h=427&f=png&s=104846" alt=""></p>
+<p>索引利用到两种采样算法</p>
+<p>index dive: 速度慢,但能得到精确的值（MySQL的实现是数索引对应的索引项个数，所以精确）</p>
+<p>index statistics: 速度快,但得到的值未必精确<br><strong>索引的优化</strong></p>
+<ol>
+<li><strong>覆盖索引</strong></li>
+</ol>
+<hr>
+<p>在普通的索引查询中当中，当辅助索引查询到主键时，还需要从主键索引中查询数据，这个过程叫做回表。比如在一个表T中，表的初始化语句是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">create table T (</span><br><span class="line">ID int primary key,</span><br><span class="line">k int NOT NULL DEFAULT 0,</span><br><span class="line">s varchar(16) NOT NULL DEFAULT &#39;&#39;,</span><br><span class="line">index k(k))</span><br><span class="line">engine&#x3D;InnoDB;</span><br></pre></td></tr></table></figure>
+
+<p>数据库插入数据</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">insert into T values(100,1, &#39;aa&#39;),(200,2,&#39;bb&#39;),(300,3,&#39;cc&#39;),(500,5,&#39;ee&#39;),(600,6,&#39;ff&#39;),(700,7,&#39;gg&#39;);</span><br></pre></td></tr></table></figure>
+
+<p>数据库执行查询语句</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from T where k between 3 and 5</span><br></pre></td></tr></table></figure>
+<pre><code>数据库索引的执行过程为</code></pre><p><img src="https://user-gold-cdn.xitu.io/2020/5/11/172044f5f5816e41?w=1142&h=856&f=png&s=169650" alt=""></p>
+<ul>
+<li><p>在k索引树上找到k=3的记录，取得 ID = 300；</p>
+</li>
+<li><p>再到ID索引树查到ID=300对应的R3；</p>
+</li>
+<li><p>在k索引树取下一个值k=5，取得ID=500；</p>
+</li>
+<li><p>再回到ID索引树查到ID=500对应的R4；</p>
+</li>
+<li><p>在k索引树取下一个值k=6，不满足条件，循环结束。</p>
+</li>
+</ul>
+<p>现在我们查询的是全部的数据，只有在主键索引上才又全部的数据，所以不得不回表，但是如果我们只需要获取主键id，那我们是不是就可以不需要再次回到主键索引去查询了呢？</p>
+<p>比如</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select id from T where id between 3 and 5</span><br></pre></td></tr></table></figure>
+<p>这次我们的执行顺序为</p>
+<ul>
+<li><p>在k索引树上找到k=3的记录，取得 ID = 300；</p>
+</li>
+<li><p>在k索引树取下一个值k=5，取得ID=500；</p>
+</li>
+<li><p>在k索引树取下一个值k=6，不满足条件，循环结束</p>
+</li>
+</ul>
+<p>在此次数据的查询中，我们每次都在索引上获取了查询结果，不需要再次回到主键索引才能获取我们需要的结果，这个过程就叫做覆盖索引，在我们的sql中需要有意的用到覆盖索引。避免不必要的查询。我们也可以通过执行计划看出来我们是否使用了覆盖索引。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">explain select id from T where id between 3 and 5</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/11/17204596f283eca9?w=802&h=357&f=png&s=50469" alt=""></p>
+<p><strong>在最后extra列中显示 using index表示此次sql的执行用到的覆盖索引</strong></p>
+<p>那是不是查询全表的sql就利用不到覆盖索引了呢？再举一个常见的例子</p>
+<p>我们在大数据量中的数据查询中常使用到分页查询，在下面的例子中，全表数据量在226w左右</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/172067fbd38b9536?w=647&h=724&f=png&s=379308" alt=""></p>
+<p>我们执行数据库查询语句</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * from &#96;phone_insurance_order_backup_20200318&#96; LIMIT 2000000,10</span><br></pre></td></tr></table></figure>
+<p>执行耗时4.27秒<br><img src="https://user-gold-cdn.xitu.io/2020/5/12/17206842a09bd940?w=487&h=733&f=png&s=135581" alt=""><br>一个最简单的分页查询，数据库会进行扫描前2000010条数据，然后去除不要的前200w条数据。那这个sql有什么问题呢？</p>
+<p>前200w条数据我们都是不需要的，但是却全部进行了查询，然后在丢弃，这都是无意义的查询，我们只需要后十条数据的结果。<br>下面看优化后的sql语句</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * from &#96;phone_insurance_order_backup_20200318&#96; p JOIN (SELECT id from &#96;phone_insurance_order_backup_20200318&#96; limit 2000000,10) t1 on p.id&#x3D;t1.id;</span><br></pre></td></tr></table></figure>
+
+<p>一共耗时395毫秒，性能提高十倍左右。为什么这么一个简单的查询性能提高这么多呢，答案就是利用到了覆盖索引。<br><img src="https://user-gold-cdn.xitu.io/2020/5/12/17206881cc0d135e?w=1028&h=729&f=png&s=239197" alt=""></p>
+<p>在子查询中我们先查询出需要的数据主键id，避免不必要的全表查询全部数据，然后在用子查询查询到的id和表中的主键连接，从而找出来所需的数据。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(SELECT id from &#96;phone_insurance_order_backup_20200318&#96; limit 2000000,10) t1</span><br></pre></td></tr></table></figure>
+
+
+<p>可以看出，覆盖索引可以减少数据库的回表次数，显著的增强了查询性能。覆盖索引是常用的一种优化手段。</p>
+<ol start="2">
+<li><strong>最左前缀匹配</strong></li>
+</ol>
+<hr>
+<p>在数据库中，我们总会对表建立索引，那是不是可以对每一个需要查询的字段都建立索引呢？肯定不是，那我们应该思考一下怎么合适的建立索引。那就需要认识一下b+树的最左前缀匹配原则。</p>
+<p>最左前缀匹配的意思是索引查找最左N个字段，也可以是字符串索引的最左M个字符，不管该索引是普通索引还是联合索引。都可以利用最左前缀匹配来查询数据。举例子：</p>
+<p>表结构为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE &#96;template_message&#96; (</span><br><span class="line">  &#96;gmt_modified&#96; timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT &#39;记录修改时间&#39;,</span><br><span class="line">  &#96;gmt_create&#96; timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT &#39;记录创建时间&#39;,</span><br><span class="line">  &#96;record_status&#96; tinyint(2) NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;数据记录逻辑删除标识 0 正常 1 已删除&#39;,</span><br><span class="line">  &#96;id&#96; int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT &#39;自增主键&#39;,</span><br><span class="line">  &#96;out_user_id&#96; varchar(64) NOT NULL DEFAULT &#39;&#39; COMMENT &#39;支付宝uid&#39;,</span><br><span class="line">  &#96;form_id&#96; varchar(64) NOT NULL DEFAULT &#39;&#39; COMMENT &#39;form_id或者trade_no&#39;,</span><br><span class="line">  &#96;pay_status&#96; varchar(16) NOT NULL DEFAULT &#39;&#39; COMMENT &#39;支付状态 已支付:already_pay 未支付:no_pay&#39;,</span><br><span class="line">  &#96;send_times&#96; tinyint(2) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;发送次数&#39;,</span><br><span class="line">  &#96;send_date&#96; timestamp NOT NULL DEFAULT &#39;1970-01-01 08:00:01&#39; COMMENT &#39;发送时间&#39;,</span><br><span class="line">  &#96;form_type&#96; varchar(16) NOT NULL DEFAULT &#39;&#39; COMMENT &#39;form_id类型 表单类:form 支付类:trade&#39;,</span><br><span class="line">  &#96;sub_type&#96; varchar(16) NOT NULL DEFAULT &#39; &#39; COMMENT &#39;子类型:业务自定义&#39;,</span><br><span class="line">  &#96;retry_times&#96; tinyint(2) unsigned DEFAULT &#39;0&#39; COMMENT &#39;重试次数&#39;,</span><br><span class="line">  PRIMARY KEY (&#96;id&#96;),</span><br><span class="line">  UNIQUE KEY &#96;out_user_id&#96; (&#96;out_user_id&#96;),</span><br><span class="line">  KEY &#96;idx_form_id&#96; (&#96;form_id&#96;,&#96;retry_times&#96;)</span><br><span class="line">) ENGINE&#x3D;InnoDB AUTO_INCREMENT&#x3D;6 DEFAULT CHARSET&#x3D;utf8 COMMENT&#x3D;&#39;消息模板&#39;;</span><br></pre></td></tr></table></figure>
+
+<p>随便插入几条测试数据</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO &#96;template_message&#96; (&#96;gmt_modified&#96;, &#96;gmt_create&#96;, &#96;record_status&#96;, &#96;id&#96;, &#96;out_user_id&#96;, &#96;form_id&#96;, &#96;pay_status&#96;, &#96;send_times&#96;, &#96;send_date&#96;, &#96;form_type&#96;, &#96;sub_type&#96;, &#96;retry_times&#96;)</span><br><span class="line">VALUES</span><br><span class="line">	(&#39;2020-05-12 14:21:00&#39;, &#39;1970-01-01 08:00:01&#39;, 0, 1, &#39;1&#39;, &#39;0232&#39;, &#39;2&#39;, 2, &#39;1970-01-01 08:00:01&#39;, &#39;&#39;, &#39; &#39;, 1),</span><br><span class="line">	(&#39;2020-05-12 14:21:06&#39;, &#39;2020-03-16 15:44:09&#39;, 0, 4, &#39;4&#39;, &#39;4121&#39;, &#39;&#39;, 0, &#39;1970-01-01 08:00:01&#39;, &#39;&#39;, &#39; &#39;, 0),</span><br><span class="line">	(&#39;2020-05-12 14:21:12&#39;, &#39;2020-03-16 15:44:14&#39;, 0, 5, &#39;5&#39;, &#39;3121&#39;, &#39;&#39;, 0, &#39;1970-01-01 08:00:01&#39;, &#39;&#39;, &#39; &#39;, 5),</span><br><span class="line">	(&#39;2020-05-12 14:21:20&#39;, &#39;1970-01-01 08:00:01&#39;, 0, 6, &#39;6&#39;, &#39;0232&#39;, &#39;2&#39;, 2, &#39;1970-01-01 08:00:01&#39;, &#39;&#39;, &#39; &#39;, 4),</span><br><span class="line">	(&#39;2020-05-12 14:21:26&#39;, &#39;2020-03-16 15:44:09&#39;, 0, 7, &#39;7&#39;, &#39;4121&#39;, &#39;&#39;, 0, &#39;1970-01-01 08:00:01&#39;, &#39;&#39;, &#39; &#39;, 0),</span><br><span class="line">	(&#39;2020-05-12 14:21:31&#39;, &#39;2020-03-16 15:44:14&#39;, 0, 8, &#39;8&#39;, &#39;3121&#39;, &#39;&#39;, 0, &#39;1970-01-01 08:00:01&#39;, &#39;&#39;, &#39; &#39;, 2);</span><br></pre></td></tr></table></figure>
+
+
+<p>查询sql</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EXPLAIN SELECT * from &#96;template_message&#96; where &#96;form_id&#96;  like &#39;312%&#39;</span><br></pre></td></tr></table></figure>
+
+
+
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/172078c6496f50cf?w=884&h=325&f=png&s=65749" alt=""></p>
+<p>可以看到，当我们对form_id进行模糊查询的时候，也是可以用到索引的，但是如果我们把模糊查询的%放到前面进行查询，还可以用到索引吗？试一下</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/1720784936935385?w=780&h=329&f=png&s=53546" alt=""></p>
+<p>显示执行计划中type为all，mysql没有用到索引，进行了全表扫描。</p>
+<p>大家可以试一下查询retry_times是否可以利用到索引。</p>
+<p>这还是针对联合索引单列进行模糊匹配的结果，实际上在此次的(<code>form_id</code>,<code>retry_times</code>)联合索引中，你可以认为数据库对form_id和 （formid,retry_times）都建立了索引，这样理解起来比较方便。</p>
+<p>b+树这种数据结构就是一颗有序的多叉树。查询从左边进行查询，一一匹配，比如(<code>form_id</code>,<code>retry_times</code>)这种联合索引先对form_id进行排序，再对retry_times进行排序，查询时先查询<br>form_id，再查询retry_times。最左匹配原则就是基于这个道理。所以在建立表索引时，有一个基本原则：</p>
+<p><strong>如果通过调整顺序，可以少维护一个索引，那么这个顺序往往就是需要优先考虑采用的</strong></p>
+<ol start="3">
+<li><strong>索引下推</strong></li>
+</ol>
+<hr>
+<p>如果在上面那个(<code>form_id</code>,<code>retry_times</code>)联合索引中，执行了下面这条语，数据库的执行情况会是怎么样的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EXPLAIN SELECT * from &#96;template_message&#96; where &#96;form_id&#96;  like &#39;312%&#39; and &#96;retry_times&#96;&#x3D;2</span><br></pre></td></tr></table></figure>
+<p>先看一下这条sql在5.6版本以前的执行情况：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/17207a39806cfad3?w=530&h=393&f=png&s=83545" alt=""></p>
+<p>mysql在数据库中查找满足<code>form_id</code>  like ‘312%’的值，主键为5和8的都满足，所以这两个都需要回表查询，主键为8的这一行不满足，放弃。这个查询一共回表两次。<br>但是在mysql5.6之后，mysql会对查询的索引段继续扫描，排除不满足的索引行。执行情况如下</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/17207a5e888c8096?w=519&h=370&f=png&s=86693" alt=""></p>
+<p>在联合索引中，retry_times为5的索引不满足条件，mysql执行器不会进行回表，此次查询共回表一次。</p>
+<p>索引下推在mysql5.6中自动开启，可以通过设置optimizer_switch([global|session],dynamic)变量开启或者关闭index_condition_push优化功能</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set optimizer_switch&#x3D;’index_condition_pushdown&#x3D;on|off’</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/17207af14640a33a?w=913&h=383&f=png&s=71353" alt=""><br>开启时extra为Using index condition意味着用到了索引下推，关闭则没有<br>Using index condition，没有进行索引下推优化</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/17207b146b1fa70d?w=842&h=325&f=png&s=58984" alt=""></p>
+<ol start="4">
+<li><strong>唯一索引和普通索引选择</strong></li>
+</ol>
+<hr>
+<p>在我们建表的时候，唯一索引常用情况就是防止数据库脏数据的产生，但是唯一索引是否一定优于普通索引呢？<br>在我们读取innodb数据页的时候，并不是一条一条的读取的，innodb会读取一页约16K的数据加载进内存中，然后对数据进行筛选。如果选择普通索引还是唯一索引，不得不提到的一个数据结构叫做change buffer。<br><img src="https://user-gold-cdn.xitu.io/2020/5/12/17207b701b7886d0?w=1142&h=856&f=png&s=269026" alt=""></p>
+<p>下面我们用一条sql语句来讲解change buffer的执行过程：<br>表中有唯一索引限制</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO &#96;template_message&#96; (&#96;gmt_modified&#96;, &#96;gmt_create&#96;, &#96;record_status&#96;, &#96;id&#96;, &#96;out_user_id&#96;, &#96;form_id&#96;, &#96;pay_status&#96;, &#96;send_times&#96;, &#96;send_date&#96;, &#96;form_type&#96;, &#96;sub_type&#96;, &#96;retry_times&#96;)</span><br><span class="line">VALUE (&#39;2020-05-12 14:21:31&#39;, &#39;2020-03-16 15:44:14&#39;, 0, 9, &#39;9&#39;, &#39;3123&#39;, &#39;&#39;, 0, &#39;1970-01-01 08:00:01&#39;, &#39;&#39;, &#39; &#39;, 2);</span><br></pre></td></tr></table></figure>
+<ol>
+<li>数据经过mysql server层到达innodb引擎执行</li>
+<li>数据页在innodb buffer pool中直接更新，两阶段提交</li>
+<li>否则从表中加载数据到innodb buffer pool判断是否唯一性冲突</li>
+<li>无冲突写入innodb buffer pool和两阶段提交</li>
+</ol>
+<p>如果是普通索引上述又会怎么执行？</p>
+<ol>
+<li>数据经过mysql server层到达innodb引擎执行</li>
+<li>数据页在innodb buffer pool中直接更新，两阶段提交</li>
+<li>否则写入change buffer和两阶段提交</li>
+</ol>
+<p>可以看出来唯一索引新增的情况会多从磁盘中扫描一次进行io，那什么时候change buffer会持久化呢？<br>我们再次执行一次普通索引情况的sql过程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from &#96;template_message&#96; where &#96;form_id&#96;&#x3D;&#39;0232&#39;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>数据经过mysql server层到达innodb引擎执行</li>
+<li>innodb buffer pool中没有命中数据行</li>
+<li>加载数据到innodb buffer pool中并marge change buffer 得到最新的数据页</li>
+<li>返回匹配数据</li>
+</ol>
+<p>大致流程如上，change buffer了访问这个数据页会触发merge外，系统后台有parge线程会定期merge。</p>
+<p>change buffer用的是buffer pool里的内存，因此不能无限增大。change buffer的大小，可以通过参数innodb_change_buffer_max_size来动态设置。这个参数设置为50的时候，表示change buffer的大小最多只能占用buffer pool的50%。</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/17207ec39b9cc2a0?w=505&h=315&f=png&s=41065" alt=""></p>
+<p>业务上首先要正常，change buffer在满足业务的时候才会考虑使用，想要靠程序来满足唯一，根据墨菲定律，必有脏数据产生（阿里巴巴开发手册）。<br>对于写多读少的业务适合change buffer，如果写入马上读则体现不出change buffer的优点，还要维护change buffer，造成不必要的性能浪费。</p>
+<p>5.其他索引规则</p>
+<ol>
+<li>官方文档显示,字段为null时,如果该字段有索引,查询该字段的时候是走索引的,两个字段组成的复合索引,都为null时,才不走索引</li>
+<li>索引在mysql server层中的优化器中进行索引的选择</li>
+<li>有时候mysql会选错索引，必要的时候可以加 force index强制让mysql选择对应的索引</li>
+</ol>
+<p>参考资料:   <a href="https://time.geekbang.org/column/intro/100020801" target="_blank" rel="noopener">https://time.geekbang.org/column/intro/100020801</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/05/26/%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E4%B9%8BCompleTableFuture/" rel="prev" title="异步编程之CompleTableFuture">
+                异步编程之CompleTableFuture <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">shuaizx</p>
+              <p class="site-description motion-element" itemprop="description">java</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shuaizx</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

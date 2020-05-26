@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="所谓异步调用其实就是实现一个可无需等待被调用函数的返回值而让操作继续运行的方法。在 Java 语言中，简单的讲就是另启一个线程来完成调用中的部分计算，使调用继续运行或返回，而不需要等待计算结果。但调用者仍需要取线程的计算结果。  在并发时代，我们常用多线程来进行异步编程，但是多线程有一个缺点，就是不容易获取线程执行后的值，尽管用一些奇招可以获取，但是这已经远离了我们的初衷。java 1.5提供了一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="异步编程之CompleTableFuture">
+<meta property="og:url" content="https://shuai1763957837.github.io/2020/05/26/%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E4%B9%8BCompleTableFuture/index.html">
+<meta property="og:site_name" content="CodingFaker">
+<meta property="og:description" content="所谓异步调用其实就是实现一个可无需等待被调用函数的返回值而让操作继续运行的方法。在 Java 语言中，简单的讲就是另启一个线程来完成调用中的部分计算，使调用继续运行或返回，而不需要等待计算结果。但调用者仍需要取线程的计算结果。  在并发时代，我们常用多线程来进行异步编程，但是多线程有一个缺点，就是不容易获取线程执行后的值，尽管用一些奇招可以获取，但是这已经远离了我们的初衷。java 1.5提供了一">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/1720976ad6f6652e?w=724&h=448&f=png&s=159603">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/1720977a0c991e68?w=772&h=497&f=png&s=251163">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/172095b7e1473930?w=739&h=390&f=png&s=140126">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/172095ca9b31f666?w=895&h=471&f=png&s=256245">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/172097f14b41277d?w=714&h=504&f=png&s=155577">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/17209883996c1454?w=775&h=637&f=png&s=299514">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/1720989d1ffc7702?w=914&h=660&f=png&s=352766">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/172099bc94934d7f?w=860&h=382&f=png&s=134078">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/21/17236391a7af643f?w=761&h=390&f=png&s=165998">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/21/1723640e3ccf63d2?w=744&h=379&f=png&s=160727">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/21/17236e59af50e556?w=793&h=494&f=png&s=203882">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/21/1723665aba40a5ba?w=777&h=482&f=png&s=189127">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/21/1723672d8d16025f?w=708&h=280&f=png&s=96588">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/21/17236774ad4d12bd?w=843&h=677&f=png&s=244060">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/21/17236791979bd0e0?w=786&h=640&f=png&s=219085">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/21/172363e21d939210?w=704&h=386&f=png&s=174433">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/21/1723653f38ec22a9?w=727&h=435&f=png&s=150297">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/21/172364d081e48e6f?w=853&h=275&f=png&s=104688">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/21/172365f0e48ad3e2?w=748&h=276&f=png&s=91918">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/21/172367bf6f057c01?w=782&h=577&f=png&s=196795">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/21/17236816d40c3f78?w=682&h=423&f=png&s=156455">
+<meta property="article:published_time" content="2020-05-26T02:16:34.711Z">
+<meta property="article:modified_time" content="2020-05-26T02:16:34.711Z">
+<meta property="article:author" content="shuaizx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/5/12/1720976ad6f6652e?w=724&h=448&f=png&s=159603">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://shuai1763957837.github.io/2020/05/26/异步编程之CompleTableFuture/"/>
+
+
+
+
+
+  <title>异步编程之CompleTableFuture | CodingFaker</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CodingFaker</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://shuai1763957837.github.io/2020/05/26/%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E4%B9%8BCompleTableFuture/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="shuaizx">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CodingFaker">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">异步编程之CompleTableFuture</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-05-26T10:16:34+08:00">
+                2020-05-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>所谓异步调用其实就是实现一个可无需等待被调用函数的返回值而让操作继续运行的方法。在 Java 语言中，简单的讲就是另启一个线程来完成调用中的部分计算，使调用继续运行或返回，而不需要等待计算结果。但调用者仍需要取线程的计算结果。</p>
+<hr>
+<p>在并发时代，我们常用多线程来进行异步编程，但是多线程有一个缺点，就是不容易获取线程执行后的值，尽管用一些奇招可以获取，但是这已经远离了我们的初衷。java 1.5提供了一个future接口,可以对线程中的执行状态进行cancle，判断isCancelled，isDone。利用多线程来获取异步执行后的值，但是也有着诸多的缺点，比如</p>
+<ol>
+<li>future没有异常处理程序，通常在future中异常后线程会一直阻塞在内部，造成异常抛不出，线程也退出不了</li>
+</ol>
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/1720976ad6f6652e?w=724&h=448&f=png&s=159603" alt=""></p>
+<p>future中的get超时方法可以解决这个问题，但是若是方法还没有执行完，超时时间也过，又会出现超时异常的问题</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">V get(long timeout, TimeUnit unit)</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/1720977a0c991e68?w=772&h=497&f=png&s=251163" alt=""></p>
+<ol start="2">
+<li>无法进行链式调用，比如我完成了这个异步任务，接着我还想用这个调用的结果完成下一个任务的调用，future无法直接做到。</li>
+<li>无法对多个调用结果进行并行计算，比如我只在其中一个执行成功后就退出，不再执行其他方法，又或者我想全部完成后在统一计算。</li>
+<li>不能在无阻塞的情况下进行其他计算，只能在阻塞方法 get之后进行其他步骤的操作</li>
+</ol>
+<p>想要用好future确实需要考虑特别多的情况。在java 8中，引入了CompletableFuture，它实现了future接口和CompletionStage接口，规定了异步计算契约的规范，并提供了他们的实现。</p>
+<p>大概的归类一下：</p>
+<ol>
+<li>以async结尾的方法都会以传入的线程池或者默认的forkjoin线程池执行任务，否则以刚才执行任务的线程继续执行</li>
+<li>以then开头的方法会继续刚才的CompletableFuture执行，实现链式调用</li>
+<li>中间带有accept的函数，传入类型是一个消费型接口Consumer，该接口接受上一个函数的值并消费,且不返回任何结果</li>
+<li>中间带有apply的函数，传入一个函数型funtion接口，该接口接受上一个结果的值并且返回计算后的值，可以用get()接收</li>
+<li>中间带有run的函数，传入一个Runnable类型，该接口不会接收值并且进行消费，不会返回值。</li>
+<li>中间带有combine或者both由两个阶段触发，可以计算他们两个结果产生的影响,不同的是combine有返回值，而both没有返回值</li>
+<li>中间带有Compose和带有apply的意思相同，但是不一样的是Compose方法会生成一个新的CompletableFuture对象继续执行，apply会继续连接刚才传入的CompletableFuture对象执行完该函数</li>
+</ol>
+<p>以上的函数api相互兼容，比如thenApplyAsync 执行上一个函数，函数型接口，新线程异步执行</p>
+<p>需要注意的是forkjoin的线程会以守护线程的方式执行，在虚拟机中main线程会在非守护线程执行完之后退出，守护线程没有执行完在控制台上看不到结果</p>
+<hr>
+<p>我们先简单的生成一个CompletableFuture</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; completableFuture &#x3D; new CompletableFuture&lt;String&gt;();</span><br></pre></td></tr></table></figure>
+<p>然后用get方法获取结果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String result &#x3D; completableFuture.get();</span><br></pre></td></tr></table></figure>
+<p>当然我们的completableFuture什么都没有做，所以get方法会一直阻塞，我们需要在get前面执行complete方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">completableFuture.complete(&quot;Future&#39;s shuaizx&quot;);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/172095b7e1473930?w=739&h=390&f=png&s=140126" alt=""></p>
+<p>或者我们也可以在get方法之前抛出一个异常</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">completableFuture.completeExceptionally(new RuntimeException());</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/172095ca9b31f666?w=895&h=471&f=png&s=256245" alt=""></p>
+<p>一切都在我们的预料当中，但是别忘了我们需要的是异步执行，所以我们开启一个线程来执行这些方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">   CompletableFuture&lt;String&gt; completableFuture&#x3D;new CompletableFuture&lt;&gt;();</span><br><span class="line">   new Thread(new Runnable() &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        completableFuture.complete(&quot;shuaizx&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).start();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   System.out.println(&quot;start&quot;);</span><br><span class="line">   System.out.println(completableFuture.get());</span><br><span class="line">   System.out.println(&quot;end&quot;);</span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/172097f14b41277d?w=714&h=504&f=png&s=155577" alt=""></p>
+<p>如果只是这样做的话和future没有任何的区别，在新的线程中抛出异常，在外部get还是获取不到结果,也不能中断执行。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">public static String get() &#123;</span><br><span class="line">    if(true)&#123;</span><br><span class="line">        throw new  RuntimeException();</span><br><span class="line">    &#125;</span><br><span class="line">    return &quot;shuaizx&quot;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public static void main(String[] args) throws Exception &#123;</span><br><span class="line">    CompletableFuture&lt;String&gt; completableFuture &#x3D; new CompletableFuture&lt;&gt;();</span><br><span class="line">    new Thread(new Runnable() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void run() &#123;</span><br><span class="line">            String value &#x3D; get();</span><br><span class="line">            completableFuture.complete(value);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;).start();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    System.out.println(&quot;start&quot;);</span><br><span class="line">    System.out.println(completableFuture.get());</span><br><span class="line">    System.out.println(&quot;end&quot;);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/17209883996c1454?w=775&h=637&f=png&s=299514" alt=""></p>
+<p>我们需要对线程内的异常进行捕获，重新组装一个completeExceptionally抛出去，这至少可以让我们外部正确处理，不再让get阻塞</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">public static String get() &#123;</span><br><span class="line">    if(true)&#123;</span><br><span class="line">        throw new  RuntimeException();</span><br><span class="line">    &#125;</span><br><span class="line">    return &quot;shuaizx&quot;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public static void main(String[] args) throws Exception &#123;</span><br><span class="line">    CompletableFuture&lt;String&gt; completableFuture &#x3D; new CompletableFuture&lt;&gt;();</span><br><span class="line">    new Thread(new Runnable() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void run() &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                String value &#x3D; get();</span><br><span class="line">                completableFuture.complete(value);</span><br><span class="line">            &#125;catch (Exception e)&#123;</span><br><span class="line">                completableFuture.completeExceptionally(e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;).start();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    System.out.println(&quot;start&quot;);</span><br><span class="line">    System.out.println(completableFuture.get());</span><br><span class="line">    System.out.println(&quot;end&quot;);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/1720989d1ffc7702?w=914&h=660&f=png&s=352766" alt=""></p>
+<p>是不是体验很不错了，至少我们不会因为异常不能抛出而感到苦恼了，但是在CompletableFuture内部已经给我们提供了静态方法，可以不用每次都写这种面条式的代码，下面介绍一下这几个方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture.runAsync(Runnable runnable);</span><br><span class="line">CompletableFuture.runAsync(Runnable runnable, Executor executor);</span><br><span class="line"></span><br><span class="line">CompletableFuture.supplyAsync(Supplier&lt;U&gt; supplier);</span><br><span class="line">CompletableFuture.supplyAsync(Supplier&lt;U&gt; supplier, Executor executor)</span><br></pre></td></tr></table></figure>
+<p>在这里介绍一下runAsync函数参数为Runnable，函数无返回值。<br>Supplier为java 8新增的函数式接口，供给型接口，说白就是一个容器，可以存储执行后的值，在最后调用get方法获取值，如果没有传入Executor线程池参数，系统会给我们安排自定义的ForkJoinPool线程，帮我们生成线程，执行任务。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">@FunctionalInterface</span><br><span class="line">public interface Supplier&lt;T&gt; &#123;</span><br><span class="line"></span><br><span class="line">    &#x2F;**</span><br><span class="line">     * Gets a result.</span><br><span class="line">     *</span><br><span class="line">     * @return a result</span><br><span class="line">     *&#x2F;</span><br><span class="line">    T get();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>举一个简单的例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; completableFuture &#x3D; CompletableFuture.supplyAsync(()-&gt;&quot;shuaizx&quot;);</span><br><span class="line"></span><br><span class="line">System.out.println(&quot;start&quot;);</span><br><span class="line">System.out.println(completableFuture.get());</span><br><span class="line">System.out.println(&quot;end&quot;);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/172099bc94934d7f?w=860&h=382&f=png&s=134078" alt=""></p>
+<p>CompletableFuture.runAsync(Runnable runnable)方法接受Runnable参数<br>举例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture.runAsync(() -&gt; &#123;</span><br><span class="line">    System.out.println(&quot;start&quot;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/17236391a7af643f?w=761&h=390&f=png&s=165998" alt=""></p>
+<p>如此简单就可以实现一个自定义的异步执行计划</p>
+<p><strong>基本api讲解CompletableFuture</strong></p>
+<hr>
+<ol>
+<li>消费型接口</li>
+</ol>
+<p>thenAccept传入Consumer型的接口，只消费不返回值，thenAcceptAsync传入自定义的线程池或者forkjoin线程池,以下消费型api遵循此规则，不过多介绍</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/1723640e3ccf63d2?w=744&h=379&f=png&s=160727" alt=""></p>
+<p>thenAcceptBoth是用来合并结果当两个CompletionStage都正常执行的时候就会执行提供的action</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">CompletableFuture&lt;Integer&gt; future &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    return 10;</span><br><span class="line">&#125;);</span><br><span class="line">System.out.println(future.thenAcceptBoth(CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    return 20;</span><br><span class="line">&#125;),(x,y) -&gt; System.out.println(x+y)).get());</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/17236e59af50e556?w=793&h=494&f=png&s=203882" alt=""></p>
+<p>whenComplete消费型接口，传入数据和异常值，不管是否异常都会继续执行,只消费不返回</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; futureSatrt &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    return &quot;start&quot;;</span><br><span class="line">&#125;).whenComplete((t,e)-&gt;&#123;</span><br><span class="line">    System.out.println(t);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">System.out.println(futureSatrt.get());</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/1723665aba40a5ba?w=777&h=482&f=png&s=189127" alt=""></p>
+<p>allOf方法会传入多个CompletableFuture，待全部执行后才返回结果，但是返回的却是一个void，需手动获取，所以不适合作为获取全部结果类型的api</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">CompletableFuture&lt;String&gt; futureSatrt &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    System.out.println(&quot;start is run&quot;);</span><br><span class="line">    return &quot;start&quot;;</span><br><span class="line">&#125;);</span><br><span class="line">CompletableFuture&lt;String&gt; futureEnd &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    System.out.println(&quot;end is run&quot;);</span><br><span class="line">    return &quot;end&quot;;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">System.out.println( CompletableFuture.allOf(futureSatrt, futureEnd).get());</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/1723672d8d16025f?w=708&h=280&f=png&s=96588" alt=""></p>
+<p>幸运的是java8 stream流的产生，可以让我们很简单的获取全部CompletableFuture的运行结果</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/17236774ad4d12bd?w=843&h=677&f=png&s=244060" alt=""></p>
+<p>但是get必须抛出一个受检查异常，我们是否可以不抛出受检异常而获取结果呢，CompletableFuture也提供了一个非受检异常让我们简单的获取结果<br>那就是join</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; futureSatrt &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    System.out.println(&quot;start is run&quot;);</span><br><span class="line">    return &quot;start&quot;;</span><br><span class="line">&#125;);</span><br><span class="line">CompletableFuture&lt;String&gt; futureEnd &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    System.out.println(&quot;end is run&quot;);</span><br><span class="line">    return &quot;end&quot;;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">List&lt;String&gt; collect &#x3D; Stream.of(futureSatrt, futureEnd).map(f -&gt; &#123;</span><br><span class="line">        return f.join();</span><br><span class="line">&#125;).collect(Collectors.toList());</span><br><span class="line"></span><br><span class="line">collect.forEach(s-&gt; System.out.println(s));</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/17236791979bd0e0?w=786&h=640&f=png&s=219085" alt=""></p>
+<ol start="2">
+<li>函数型接口</li>
+</ol>
+<p>thenApply传入一个Function型接口，返回处理后的值，thenApplyAsync需要传入自定义的线程池或者forkjoin线程池，其余不变，以下消费型api遵循此规则，不过多介绍</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/172363e21d939210?w=704&h=386&f=png&s=174433" alt=""></p>
+<p>thenCompose接收一个新的CompletionStage型的函数型接口，返回处理后的值</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; futureSatrt &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    return &quot;start&quot;;</span><br><span class="line">&#125;).thenCompose(r-&gt;CompletableFuture.supplyAsync(()-&gt;&#123;</span><br><span class="line">    return r+&quot;end&quot;;&#125;));</span><br><span class="line"></span><br><span class="line">System.out.println(futureSatrt.get());</span><br></pre></td></tr></table></figure>
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/1723653f38ec22a9?w=727&h=435&f=png&s=150297" alt=""></p>
+<p>thenCompose和thenApply的区别，thenApply处理的CompletableFuture和处理后的CompletableFuture是同一个，而thenCompose需要传入新的CompletableFuture，并且处理后的CompletableFuture是一个全新的CompletableFuture</p>
+<p>thenCombine,你可以用thenCombine连接两个不同的CompletableFuture让他们连接起来,返回一个新的CompletableFuture，用get获取结果，可以看到组合两个CompletableFuture返回的新的CompletableFuture不是同一个，和thenAcceptBoth的区别是这个接口会返回值，而thenAcceptBoth只消费</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; futureSatrt &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">            return &quot;start&quot;;</span><br><span class="line">        &#125;);</span><br><span class="line">        CompletableFuture&lt;String&gt; futureEnd &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">            return &quot;end&quot;;</span><br><span class="line">        &#125;);</span><br><span class="line">        CompletableFuture&lt;String&gt; thenCombine &#x3D; futureSatrt.thenCombine(futureEnd, (start, end) -&gt; start + end);</span><br><span class="line">        System.out.println(thenCombine.get());</span><br><span class="line">        System.out.println(futureSatrt);</span><br><span class="line">        System.out.println(futureEnd);</span><br><span class="line">        System.out.println(thenCombine);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/172364d081e48e6f?w=853&h=275&f=png&s=104688" alt=""></p>
+<p>handle接口类型是函数型接口，传入数据和异常值，不管执行是否出现异常都会执行，和whenComplete相对应，返回处理后的值</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; futureSatrt &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    return &quot;start&quot;;</span><br><span class="line">&#125;).handle((t,e)-&gt;&#123;</span><br><span class="line">    System.out.println(e);</span><br><span class="line">    return t+&quot;end&quot;;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">System.out.println(futureSatrt.get());</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/172365f0e48ad3e2?w=748&h=276&f=png&s=91918" alt=""></p>
+<p>另一个同allof类型的api是anyof，当有一个CompletableFuture运行完时便退出</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; futureSatrt &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    System.out.println(&quot;start is run&quot;);</span><br><span class="line">    return &quot;start&quot;;</span><br><span class="line">&#125;);</span><br><span class="line">CompletableFuture&lt;String&gt; futureEnd &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    System.out.println(&quot;end is run&quot;);</span><br><span class="line">    return &quot;end&quot;;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">Object o &#x3D; CompletableFuture.anyOf(futureSatrt, futureEnd).get();</span><br><span class="line"></span><br><span class="line">System.out.println(o);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/172367bf6f057c01?w=782&h=577&f=png&s=196795" alt=""><br>运行的是anyof可以让我们获取到执行的值。</p>
+<p>exceptionally可以让我们获取执行的异常并返回自定义的值</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;Object&gt; end &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    System.out.println(&quot;end is run&quot;);</span><br><span class="line">    throw new RuntimeException();</span><br><span class="line">&#125;).exceptionally((e) -&gt; &quot;error&quot;);</span><br><span class="line"></span><br><span class="line">System.out.println(end.get());</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/17236816d40c3f78?w=682&h=423&f=png&s=156455" alt=""></p>
+<p>以上只是java8版本的CompletableFuture基本api，在java9时又增加部分api，有兴趣的可以下去了解</p>
+<p><strong>CompletableFuture原理请移步</strong></p>
+<hr>
+<p><a href="http://youngitman.tech/2019/02/13/completablefuture%E6%BA%90%E7%A0%81/" target="_blank" rel="noopener">http://youngitman.tech/2019/02/13/completablefuture%E6%BA%90%E7%A0%81/</a></p>
+<p>参考资料：</p>
+<ol>
+<li><a href="https://yq.aliyun.com/articles/712258" target="_blank" rel="noopener">https://yq.aliyun.com/articles/712258</a></li>
+<li><a href="https://www.cnblogs.com/txmfz/p/11266411.html" target="_blank" rel="noopener">https://www.cnblogs.com/txmfz/p/11266411.html</a></li>
+<li><a href="http://youngitman.tech/2019/02/13/completablefuture%E6%BA%90%E7%A0%81/" target="_blank" rel="noopener">http://youngitman.tech/2019/02/13/completablefuture%E6%BA%90%E7%A0%81/</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/26/%E5%88%9D%E8%AF%86mysql%E7%B4%A2%E5%BC%95/" rel="next" title="初识mysql索引">
+                <i class="fa fa-chevron-left"></i> 初识mysql索引
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/05/26/%E6%B5%85%E5%97%91ThreadLocal%E4%B9%8B%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/" rel="prev" title="浅嗑ThreadLocal之内存泄漏">
+                浅嗑ThreadLocal之内存泄漏 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">shuaizx</p>
+              <p class="site-description motion-element" itemprop="description">java</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shuaizx</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
