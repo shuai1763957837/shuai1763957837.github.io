@@ -87,10 +87,10 @@
 <meta property="og:description" content="在传统对象分配当中，通常在堆上进行对象实例的分配，但是随着JIT编译器的发展和逃逸分析技术的成熟，在栈上分配内存也不那么绝对了。下面简单介绍逃逸分析、栈上分配、标量替换和锁消除  逃逸分析 hotSpot虚拟机可以利用相应算法，判断对象是否逃逸，从而实现对象是否在栈上分配还是堆分配的一项技术。 逃逸又分为几种情况： 1、全局逃逸（GlobalEscape）即一个对象的作用范围逃出了当前方法或者当">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/25/1724a78da4fc920c?w=659&h=514&f=png&s=160900">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/25/1724a7a9164fce6d?w=820&h=790&f=png&s=264863">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/25/1724a90ee6d84b23?w=1169&h=621&f=png&s=258081">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/29/1725df8b5ead366e?w=1004&h=644&f=png&s=247172">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/25/1724a9165c4172d2?w=580&h=295&f=png&s=227779">
 <meta property="article:published_time" content="2020-05-19T10:22:00.000Z">
-<meta property="article:modified_time" content="2020-05-19T10:22:00.000Z">
+<meta property="article:modified_time" content="2020-05-29T01:08:59.049Z">
 <meta property="article:author" content="shuaizx">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/5/25/1724a78da4fc920c?w=659&h=514&f=png&s=160900">
@@ -385,12 +385,13 @@
     System.out.println(ClassLayout.parseInstance(buffer).toPrintable());
 }
 
-public static void main(String[] args) {
+public static void main(String[] args) throws InterruptedException {
+    Thread.sleep(5000);
     long b = System.currentTimeMillis();
     alloc();
     long e = System.currentTimeMillis();
     System.out.println(e - b);
-}</code></pre><p><img src="https://user-gold-cdn.xitu.io/2020/5/25/1724a90ee6d84b23?w=1169&h=621&f=png&s=258081" alt=""></p>
+}</code></pre><p><img src="https://user-gold-cdn.xitu.io/2020/5/29/1725df8b5ead366e?w=1004&h=644&f=png&s=247172" alt=""></p>
 <p><img src="https://user-gold-cdn.xitu.io/2020/5/25/1724a9165c4172d2?w=580&h=295&f=png&s=227779" alt=""></p>
 <p>按照打印的对象头从高到低打印，表示锁信息的记录为00000001后三位001，对应的表中的锁状态为无锁状态。表明StringBuffer在局部方法内无锁。同步消除同样需要逃逸分析，建立在对象未逃逸的情况下。java8中以默认开启。</p>
 <p>锁消除的 JVM 参数如下：</p>
@@ -432,6 +433,10 @@ public static void main(String[] args) {
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/06/01/crash-safe%EF%BC%8Credo-log%E5%92%8Cbinlog%E4%BD%A0%E9%9C%80%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E7%9F%A5%E8%AF%86/" rel="prev" title="CrashSafe，redo log和binlog你需要了解的知识">
+                CrashSafe，redo log和binlog你需要了解的知识 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -502,7 +507,7 @@ public static void main(String[] args) {
               
                 <a href="/archives">
               
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

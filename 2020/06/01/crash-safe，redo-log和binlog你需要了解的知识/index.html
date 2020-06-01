@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="当系统宕机了怎么办，数据怎么恢复的？innodb引擎怎么实现crash-safe的，想要了解这些问题的答案，redo log（重做日志）和binlog（归档日志）你必须了解。  我们先来看一条更新语句的执行过程 解释一下相关流程  sql经过连接器，分析器，优化器，执行器正式执行 若innnodb buffer pool中无缓存值，则读取磁盘中的数据，更新到innodb buffer pool 若">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CrashSafe，redo log和binlog你需要了解的知识">
+<meta property="og:url" content="https://shuai1763957837.github.io/2020/06/01/crash-safe%EF%BC%8Credo-log%E5%92%8Cbinlog%E4%BD%A0%E9%9C%80%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E7%9F%A5%E8%AF%86/index.html">
+<meta property="og:site_name" content="codingfaker">
+<meta property="og:description" content="当系统宕机了怎么办，数据怎么恢复的？innodb引擎怎么实现crash-safe的，想要了解这些问题的答案，redo log（重做日志）和binlog（归档日志）你必须了解。  我们先来看一条更新语句的执行过程 解释一下相关流程  sql经过连接器，分析器，优化器，执行器正式执行 若innnodb buffer pool中无缓存值，则读取磁盘中的数据，更新到innodb buffer pool 若">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/1/1726d8f0e12cc650?w=509&h=566&f=png&s=131115">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/29/1725f4f135689095?w=1142&h=856&f=png&s=267851">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/31/17269f0ae14f1c02?w=465&h=250&f=png&s=64274">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/31/17269e8f67d22a98?w=550&h=332&f=png&s=121380">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/31/17269faf1769f513?w=1142&h=656&f=png&s=161652">
+<meta property="article:published_time" content="2020-06-01T02:05:02.000Z">
+<meta property="article:modified_time" content="2020-06-01T02:07:14.983Z">
+<meta property="article:author" content="shuaizx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/6/1/1726d8f0e12cc650?w=509&h=566&f=png&s=131115">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://shuai1763957837.github.io/2020/06/01/crash-safe，redo-log和binlog你需要了解的知识/"/>
+
+
+
+
+
+  <title>CrashSafe，redo log和binlog你需要了解的知识 | codingfaker</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?b1184fa1044d00d51aa7f5413396d0ff";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">codingfaker</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://shuai1763957837.github.io/2020/06/01/crash-safe%EF%BC%8Credo-log%E5%92%8Cbinlog%E4%BD%A0%E9%9C%80%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E7%9F%A5%E8%AF%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="shuaizx">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="codingfaker">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">CrashSafe，redo log和binlog你需要了解的知识</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-01T10:05:02+08:00">
+                2020-06-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/06/01/crash-safe%EF%BC%8Credo-log%E5%92%8Cbinlog%E4%BD%A0%E9%9C%80%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E7%9F%A5%E8%AF%86/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/01/crash-safe%EF%BC%8Credo-log%E5%92%8Cbinlog%E4%BD%A0%E9%9C%80%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E7%9F%A5%E8%AF%86/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/06/01/crash-safe%EF%BC%8Credo-log%E5%92%8Cbinlog%E4%BD%A0%E9%9C%80%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E7%9F%A5%E8%AF%86/" class="leancloud_visitors" data-flag-title="CrashSafe，redo log和binlog你需要了解的知识">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>当系统宕机了怎么办，数据怎么恢复的？innodb引擎怎么实现crash-safe的，想要了解这些问题的答案，redo log（重做日志）和binlog（归档日志）你必须了解。</p>
+<hr>
+<p>我们先来看一条更新语句的执行过程</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/1/1726d8f0e12cc650?w=509&h=566&f=png&s=131115" alt=""><br>解释一下相关流程</p>
+<ol>
+<li>sql经过连接器，分析器，优化器，执行器正式执行</li>
+<li>若innnodb buffer pool中无缓存值，则读取磁盘中的数据，更新到innodb buffer pool</li>
+<li>若innodb buffer pool中有相应缓存的值，则读取到执行器中，更新name=”shuaizx”,在更新到innodb buffer pool中</li>
+<li>执行两阶段提交：先执行redo log prepare阶段，如图中的第三步。在执行图中的第四步写入binlog。成功之后执行器通知redo log执行commit。整个阶段完成。用户可以看到相应执行结果。</li>
+</ol>
+<p>可见数据并不会直接写入磁盘，而是把记录提交到redo log进行后续操作，写入到redo log到最终写入磁盘的这一个过程被称作WAL技术，在稍后会进行介绍。</p>
+<p>在图中innodb buffer pool有个change buffer，这是innodb对写普通索引写操作所做的优化。详情可见<br><a href="https://shuai1763957837.github.io/2020/04/25/%E5%88%9D%E8%AF%86mysql%E7%B4%A2%E5%BC%95/">https://shuai1763957837.github.io/2020/04/25/%E5%88%9D%E8%AF%86mysql%E7%B4%A2%E5%BC%95/</a> 唯一索引和普通索引的选择。</p>
+<hr>
+<p>第四步的整体叫做两阶段提交。会在这涉及到两个日志文件：redo log和binlog<br>。</p>
+<p>binlog叫做归档日志，是mysql提供的，所有的存储引擎都可以使用这个日志，追加写，日志文件会不断增大，在数据备份时我们就会用到这个文件，binlog只提供归档能力，binlog日志包含了引起或可能引起数据库改变(如delete语句但没有匹配行)的事件信息，但绝不会包括select和show这样的查询语句。语句以”事件”的形式保存，所以包含了时间、事件开始和结束位置等信息。</p>
+<p>redo log 重做日志，是innodb独有的，mysql并没有提供原生的crash-safe能力，另外一个公司以插件的形式提供了innodb引擎，引入了redo log日志。redo log提供了数据的恢复能力，当数据在内存中但是没有更新到磁盘中的时候，数据库宕机，这个时候恢复数据库时会查找redo log的日志，所有commit和redo log是prepare且binlog记录在案的数据都会被恢复，保证了一致性。redo log通常是物理日志，记录的是数据页的物理修改，而不是某一行或某几行修改成怎样怎样，它用来恢复提交后的物理数据页(恢复数据页，且只能恢复到最后一次提交的位置)。</p>
+<p><strong>redo log提供的是事物恢复的能力，意味着大多数情况下并不直接参与数据的刷盘工作，如果是数据库异常重启，数据库才会查找redo log进行事物的对照恢复</strong><br><img src="https://user-gold-cdn.xitu.io/2020/5/29/1725f4f135689095?w=1142&h=856&f=png&s=267851" alt=""></p>
+<p>为什么需要两阶段提交，先写redo log或者先写binlog不行吗。我们假设一个几个错误情况：</p>
+<p>数据库数据</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">id name</span><br><span class="line">1  guo</span><br></pre></td></tr></table></figure>
+<p>执行sql语句</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">update t set name&#x3D;&quot;shuaizx&quot; where id&#x3D;1</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>先写redo log，在写binlog：在记录提交到redo log中，但是没有提交到binlog中，数据库宕机了，这个时候数据库会查找redo log的commit数据，然后恢复这些数据库文件，把name改成shuaizx。但是binlog并没有记录这条数据，当数据库进行备份的时候，会利用binlog进行备份，这个时候name等于guo。这个时候会造成数据库不一致的情况。</li>
+<li>先写binlog，在写redo log：在写入binlog的时候，数据库宕机，redo log没有进行写入，这个时候恢复数据库，原数据库文件name还是guo。但是，当进行数据库备份的时候，name在binlog中已经被修改为shaizx，这个时候所有备份的数据name都是shuaizx，也会造成数据库不一致的情况。</li>
+</ol>
+<p>从上诉的流程可以知道，不管先进行redo log的写入还是binlog的写入都会造成不一致的情况，因为binlog和redo log都是数据库恢复的重要日志，缺一不可，如果想要保证一致性则需要两阶段提交，让这两个状态保持逻辑上的一致。</p>
+<hr>
+<p>当数据写入redo log之后，怎么写入到磁盘的呢？这就涉及到数据库中的<strong>WAL</strong>技术，WAL的全称是Write-Ahead Logging，它的关键点就是先写日志，再写磁盘。为什么需要先写入redo log，而不是直接写入磁盘？写入磁盘只写入一次，而写redo log再写磁盘需要写入两次，这个就需要了解磁盘的写入过程。</p>
+<p>在磁盘中，如果直接写入话，需要随机io进行读写，而磁盘中磁头相对于cpu的速度又太慢了，而每次事物进行commit都需要随机io。redo log是顺序写入，相对于随机写入过程则快了数倍。</p>
+<p>在redo log的写入过程中，又分为几个阶段：一个是数据写入redo log file阶段，另一个是redo log file写入磁盘变成真正数据形式的阶段。</p>
+<ol>
+<li>写入redo log file阶段</li>
+</ol>
+<p>MySQL支持用户自定义在commit时如何将log buffer中的日志刷log file中。这种控制通过变量 <strong>innodb_flush_log_at_trx_commit</strong> 的值来决定。该变量有3种值：0、1、2，默认为1。但注意，这个变量只是控制commit动作是否刷新log buffer到磁盘</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/31/17269f0ae14f1c02?w=465&h=250&f=png&s=64274" alt=""><br><img src="https://user-gold-cdn.xitu.io/2020/5/31/17269e8f67d22a98?w=550&h=332&f=png&s=121380" alt=""><br>当设置为1的时候，事务每次提交都会将log buffer中的日志写入os buffer并调用fsync()刷到log file on disk中。这种方式即使系统崩溃也不会丢失任何数据，但是因为每次提交都写入磁盘，IO的性能较差。</p>
+<p>当设置为0的时候，事务提交时不会将log buffer中日志写入到os buffer，而是每秒写入os buffer并调用fsync()写入到log file on disk中。也就是说设置为0时是(大约)每秒刷新写入到磁盘中的，当系统崩溃，会丢失1秒钟的数据。</p>
+<p>当设置为2的时候，每次提交都仅写入到os buffer，然后是每秒调用fsync()将os buffer中的日志写入到log file on disk。</p>
+<ol start="2">
+<li>当数据写入redo log files之后，文件又是怎么样写入磁盘中的呢？<br><img src="https://user-gold-cdn.xitu.io/2020/5/31/17269faf1769f513?w=1142&h=656&f=png&s=161652" alt=""></li>
+</ol>
+<p>在大多数时候，内存中的数据和磁盘中的数据是不一样的，当内存数据页跟磁盘数据页内容不一致的时候，我们称这个内存页为“脏页”。内存数据写入到磁盘后，内存和磁盘上的数据页的内容就一致了，称为“干净页”。</p>
+<p>checkpoint是记录文件当前操作的位置。也就是checkpoint之前的数据表示都已经从内存中刷入磁盘成为了干净页，推进的的过程会不断的对比，遇到干净页则跳过。随着checkpoint会向后不断的移动，数据不断的刷入磁盘文件。直到追上write pos这个位置，表示内存中全部为干净页。从checkpoint到write pos之间的日志表示还没有内存中还存在这么多没有对比的数据。</p>
+<p>write pos是数据操作记录加载进的位置，该位置表示数据操作记录源源不断的写入到了log files，但是还没有进行对比确定成为正真的干净页。当数据写入到ib-logfile-3之后，又会从ib-logfile-0重新写入。形成一个链式循环。从write pos到checkpoint的空间表示可存储空间。</p>
+<p>buffer pool里维护着一个脏页列表，假设现在redo log 的 checkpoint 记录的 LSN 为 10，现在内存中的一干净页有修改，修改后该页的LSN为12，大于 checkpoint 的LSN，则在写redo log的同时该页也会被标记为脏页记录到脏页列表中，现在内存不足，该页需要被淘汰掉，该页会被刷到磁盘，磁盘中该页的LSN为12，该页也从脏页列表中移除，现在redo log 需要往前推进checkpoint，到LSN为12的这条log时，发现内存中的脏页列表里没有该页，且磁盘上该页的LSN也已经为12，则该页已刷脏，已为干净页，跳过</p>
+<p>那什么时候会进行上诉这个刷脏页的过程呢，大概下面四种场景中会进行这种操作：</p>
+<ol>
+<li>第一在上图中write pos快追上checkpoint的时候，表示redo log files文件已经满了，这个时候数据库必须停下来自己的事了，因为在进行日志的写入也不可能往后续添加了。</li>
+<li>第二就是内存数据快要满了，在写入内存数据就需要淘汰一些数据，但是淘汰的数据是还没有写入磁盘中的，这个时候在读出磁盘中的数据就是旧数据，这个时候会发生数据不一致的情况，所以这个时候必须把innodb buffer pool中的脏数据更新到磁盘中，让磁盘中的数据是最新的数据。</li>
+<li>第三就是数据库认为自己不忙的时候，这个时候空闲了下来，数据库就会开启后台线程进行脏页的刷新。比较好理解。</li>
+<li>第四就是正常关闭数据库的时候，数据库需要持久化数据，就需要推进这些redo log files日志文件。在下次正常启动数据库的时候，可以直接从磁盘中读数据文件，不必在去redo log files中刷新文件。速度相对快很多。</li>
+</ol>
+<p>redo log有这种提交机制，那binlog有没有呢？也有，下面就介绍binlog的提交机制：</p>
+<p>sync_binlog = { 0 | n } #这个参数直接影响mysql的性能和完整性</p>
+<p>sync_binlog=0:不同步，日志何时刷到磁盘由FileSystem决定，这个性能最好。</p>
+<p>sync_binlog=n:每写n次binlog日志事件(不是事务)，MySQL将执行一次磁盘同步指令fdatasync()将缓存日志刷新到磁盘日志文件中。</p>
+<p>Mysql中默认的设置是sync_binlog=0，即不同步，这时性能最好，但风险最大。一旦系统奔溃，缓存中的日志都会丢失。</p>
+<p>在innodb的主从复制结构中，如果启用了binlog日志(几乎都会启用)，要保证事务的一致性和持久性的时候，必须将sync_binlog的值设置为1，因为每次事务提交都会写入日志，设置为1就保证了每次事务提交时binlog日志都会写入到磁盘中，从而立即被从服务器复制过去。</p>
+<p>在redo log中为prepare，binlog也提交的数据中，怎么让他们产生依赖恢复数据的呢？<br>答案就是它们有一个共同的数据字段，叫XID。崩溃恢复的时候，会按顺序扫描redo log：</p>
+<p>如果碰到既有prepare、又有commit的redo log，就直接提交；</p>
+<p>如果碰到只有parepare、而没有commit的redo log，就拿着XID去binlog找对应的事务</p>
+<hr>
+<p>为了解决redo log和binlog频繁提交问题，最初mysql引入了redo log的组提交，在mysql5.6中也引入了binlog的组提交。将 binlog 的 commit 阶段分为三个阶段：flush stage、sync stage 以及 commit stage。</p>
+<p>这三个阶段中，每个阶段都会去维护一个队列。</p>
+<p>每个阶段都在维护一个队列，第一个进入该队列的作为 leader 线程，否则作为 follower 线程；leader 线程会收集 follower 的事务，并负责做 sync，follower 线程等待 leader 通知操作完成。详情请看</p>
+<p><a href="https://jin-yang.github.io/post/mysql-group-commit.html" target="_blank" rel="noopener">https://jin-yang.github.io/post/mysql-group-commit.html</a></p>
+<p><strong>其实主要强调的就是，redo log保证事物崩溃时数据的安全恢复，在大多数情况下不直接干预数据的刷盘，和binlog共同保证数据的一致性，在大多数场景下一般开启双1保证数据的不丢失，是保证CrashSafe的根本。所有的优化都是为了减少磁盘io的写入或者延迟写入，增大系统的性能</strong></p>
+<p>参考文章：</p>
+<p><a href="https://www.cnblogs.com/f-ck-need-u/archive/2018/05/08/9010872.html" target="_blank" rel="noopener">https://www.cnblogs.com/f-ck-need-u/archive/2018/05/08/9010872.html</a></p>
+<p><a href="https://www.cnblogs.com/f-ck-need-u/p/9001061.html#blog5" target="_blank" rel="noopener">https://www.cnblogs.com/f-ck-need-u/p/9001061.html#blog5</a></p>
+<p><a href="https://time.geekbang.org/column/intro/100020801" target="_blank" rel="noopener">https://time.geekbang.org/column/intro/100020801</a></p>
+<p><a href="https://jin-yang.github.io/post/mysql-group-commit.html" target="_blank" rel="noopener">https://jin-yang.github.io/post/mysql-group-commit.html</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/19/%E5%AF%B9%E8%B1%A1%E4%B8%80%E5%AE%9A%E5%9C%A8%E5%A0%86%E4%B8%8A%E5%88%86%E9%85%8D%E5%90%97%EF%BC%9F%E8%AE%BA%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90%E3%80%81%E6%A0%88%E4%B8%8A%E5%88%86%E9%85%8D%E3%80%81%E6%A0%87%E9%87%8F%E6%9B%BF%E6%8D%A2%E5%92%8C%E9%94%81%E6%B6%88%E9%99%A4/" rel="next" title="对象一定在堆上分配吗？论逃逸分析、栈上分配、标量替换和锁消除">
+                <i class="fa fa-chevron-left"></i> 对象一定在堆上分配吗？论逃逸分析、栈上分配、标量替换和锁消除
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">shuaizx</p>
+              <p class="site-description motion-element" itemprop="description">java</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shuaizx</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: '1RtaFeL1X2iHoDB2lwtYnEeI-gzGzoHsz',
+        appKey: 'bb4x5BHK2OkQrnvbt3VuWUgm',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("1RtaFeL1X2iHoDB2lwtYnEeI-gzGzoHsz", "bb4x5BHK2OkQrnvbt3VuWUgm");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
