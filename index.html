@@ -79,12 +79,10 @@
 
 
 
-<meta name="description" content="java">
 <meta property="og:type" content="website">
 <meta property="og:title" content="codingfaker">
 <meta property="og:url" content="https://shuai1763957837.github.io/index.html">
 <meta property="og:site_name" content="codingfaker">
-<meta property="og:description" content="java">
 <meta property="article:author" content="shuaizx">
 <meta name="twitter:card" content="summary">
 
@@ -198,6 +196,26 @@
         </li>
       
         
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
         <li class="menu-item menu-item-archives">
           <a href="/archives" rel="section">
             
@@ -245,7 +263,7 @@
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="shuaizx">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="image" content="/images/hdImg_9e0cc479c1d3cf63fee27a0bb57814ed1590983454483.jpg">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -259,7 +277,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/06/01/crash-safe%EF%BC%8Credo-log%E5%92%8Cbinlog%E4%BD%A0%E9%9C%80%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E7%9F%A5%E8%AF%86/" itemprop="url">CrashSafe，redo log和binlog你需要了解的知识</a></h1>
+                <a class="post-title-link" href="/2020/06/01/crash-safe%EF%BC%8Credo-log%E5%92%8Cbinlog%E4%BD%A0%E9%9C%80%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E7%9F%A5%E8%AF%86/" itemprop="url">crash-safe，redo log和binlog你需要了解这些知识</a></h1>
         
 
         <div class="post-meta">
@@ -282,6 +300,28 @@
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/mysql/" itemprop="url" rel="index">
+                    <span itemprop="name">mysql</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -299,7 +339,7 @@
 
           
           
-             <span id="/2020/06/01/crash-safe%EF%BC%8Credo-log%E5%92%8Cbinlog%E4%BD%A0%E9%9C%80%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E7%9F%A5%E8%AF%86/" class="leancloud_visitors" data-flag-title="CrashSafe，redo log和binlog你需要了解的知识">
+             <span id="/2020/06/01/crash-safe%EF%BC%8Credo-log%E5%92%8Cbinlog%E4%BD%A0%E9%9C%80%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E7%9F%A5%E8%AF%86/" class="leancloud_visitors" data-flag-title="crash-safe，redo log和binlog你需要了解这些知识">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -332,81 +372,20 @@
       
         
           
-            <p>当系统宕机了怎么办，数据怎么恢复的？innodb引擎怎么实现crash-safe的，想要了解这些问题的答案，redo log（重做日志）和binlog（归档日志）你必须了解。</p>
-<hr>
-<p>我们先来看一条更新语句的执行过程</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/6/1/1726d8f0e12cc650?w=509&h=566&f=png&s=131115" alt=""><br>解释一下相关流程</p>
-<ol>
-<li>sql经过连接器，分析器，优化器，执行器正式执行</li>
-<li>若innnodb buffer pool中无缓存值，则读取磁盘中的数据，更新到innodb buffer pool</li>
-<li>若innodb buffer pool中有相应缓存的值，则读取到执行器中，更新name=”shuaizx”,在更新到innodb buffer pool中</li>
-<li>执行两阶段提交：先执行redo log prepare阶段，如图中的第三步。在执行图中的第四步写入binlog。成功之后执行器通知redo log执行commit。整个阶段完成。用户可以看到相应执行结果。</li>
-</ol>
-<p>可见数据并不会直接写入磁盘，而是把记录提交到redo log进行后续操作，写入到redo log到最终写入磁盘的这一个过程被称作WAL技术，在稍后会进行介绍。</p>
-<p>在图中innodb buffer pool有个change buffer，这是innodb对写普通索引写操作所做的优化。详情可见<br><a href="https://shuai1763957837.github.io/2020/04/25/%E5%88%9D%E8%AF%86mysql%E7%B4%A2%E5%BC%95/">https://shuai1763957837.github.io/2020/04/25/%E5%88%9D%E8%AF%86mysql%E7%B4%A2%E5%BC%95/</a> 唯一索引和普通索引的选择。</p>
-<hr>
-<p>第四步的整体叫做两阶段提交。会在这涉及到两个日志文件：redo log和binlog<br>。</p>
-<p>binlog叫做归档日志，是mysql提供的，所有的存储引擎都可以使用这个日志，追加写，日志文件会不断增大，在数据备份时我们就会用到这个文件，binlog只提供归档能力，binlog日志包含了引起或可能引起数据库改变(如delete语句但没有匹配行)的事件信息，但绝不会包括select和show这样的查询语句。语句以”事件”的形式保存，所以包含了时间、事件开始和结束位置等信息。</p>
-<p>redo log 重做日志，是innodb独有的，mysql并没有提供原生的crash-safe能力，另外一个公司以插件的形式提供了innodb引擎，引入了redo log日志。redo log提供了数据的恢复能力，当数据在内存中但是没有更新到磁盘中的时候，数据库宕机，这个时候恢复数据库时会查找redo log的日志，所有commit和redo log是prepare且binlog记录在案的数据都会被恢复，保证了一致性。redo log通常是物理日志，记录的是数据页的物理修改，而不是某一行或某几行修改成怎样怎样，它用来恢复提交后的物理数据页(恢复数据页，且只能恢复到最后一次提交的位置)。</p>
-<p><strong>redo log提供的是事物恢复的能力，意味着大多数情况下并不直接参与数据的刷盘工作，如果是数据库异常重启，数据库才会查找redo log进行事物的对照恢复</strong><br><img src="https://user-gold-cdn.xitu.io/2020/5/29/1725f4f135689095?w=1142&h=856&f=png&s=267851" alt=""></p>
-<p>为什么需要两阶段提交，先写redo log或者先写binlog不行吗。我们假设一个几个错误情况：</p>
-<p>数据库数据</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">id name</span><br><span class="line">1  guo</span><br></pre></td></tr></table></figure>
-<p>执行sql语句</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">update t set name&#x3D;&quot;shuaizx&quot; where id&#x3D;1</span><br></pre></td></tr></table></figure>
+          当系统宕机了怎么办，数据怎么恢复的？innodb引擎怎么实现crash-safe的，想要了解这些问题的答案，redo log（重做日志）和binlog（归档日志）你必须了解。
 
-<ol>
-<li>先写redo log，在写binlog：在记录提交到redo log中，但是没有提交到binlog中，数据库宕机了，这个时候数据库会查找redo log的commit数据，然后恢复这些数据库文件，把name改成shuaizx。但是binlog并没有记录这条数据，当数据库进行备份的时候，会利用binlog进行备份，这个时候name等于guo。这个时候会造成数据库不一致的情况。</li>
-<li>先写binlog，在写redo log：在写入binlog的时候，数据库宕机，redo log没有进行写入，这个时候恢复数据库，原数据库文件name还是guo。但是，当进行数据库备份的时候，name在binlog中已经被修改为shaizx，这个时候所有备份的数据name都是shuaizx，也会造成数据库不一致的情况。</li>
-</ol>
-<p>从上诉的流程可以知道，不管先进行redo log的写入还是binlog的写入都会造成不一致的情况，因为binlog和redo log都是数据库恢复的重要日志，缺一不可，如果想要保证一致性则需要两阶段提交，让这两个状态保持逻辑上的一致。</p>
-<hr>
-<p>当数据写入redo log之后，怎么写入到磁盘的呢？这就涉及到数据库中的<strong>WAL</strong>技术，WAL的全称是Write-Ahead Logging，它的关键点就是先写日志，再写磁盘。为什么需要先写入redo log，而不是直接写入磁盘？写入磁盘只写入一次，而写redo log再写磁盘需要写入两次，这个就需要了解磁盘的写入过程。</p>
-<p>在磁盘中，如果直接写入话，需要随机io进行读写，而磁盘中磁头相对于cpu的速度又太慢了，而每次事物进行commit都需要随机io。redo log是顺序写入，相对于随机写入过程则快了数倍。</p>
-<p>在redo log的写入过程中，又分为几个阶段：一个是数据写入redo log file阶段，另一个是redo log file写入磁盘变成真正数据形式的阶段。</p>
-<ol>
-<li>写入redo log file阶段</li>
-</ol>
-<p>MySQL支持用户自定义在commit时如何将log buffer中的日志刷log file中。这种控制通过变量 <strong>innodb_flush_log_at_trx_commit</strong> 的值来决定。该变量有3种值：0、1、2，默认为1。但注意，这个变量只是控制commit动作是否刷新log buffer到磁盘</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/31/17269f0ae14f1c02?w=465&h=250&f=png&s=64274" alt=""><br><img src="https://user-gold-cdn.xitu.io/2020/5/31/17269e8f67d22a98?w=550&h=332&f=png&s=121380" alt=""><br>当设置为1的时候，事务每次提交都会将log buffer中的日志写入os buffer并调用fsync()刷到log file on disk中。这种方式即使系统崩溃也不会丢失任何数据，但是因为每次提交都写入磁盘，IO的性能较差。</p>
-<p>当设置为0的时候，事务提交时不会将log buffer中日志写入到os buffer，而是每秒写入os buffer并调用fsync()写入到log file on disk中。也就是说设置为0时是(大约)每秒刷新写入到磁盘中的，当系统崩溃，会丢失1秒钟的数据。</p>
-<p>当设置为2的时候，每次提交都仅写入到os buffer，然后是每秒调用fsync()将os buffer中的日志写入到log file on disk。</p>
-<ol start="2">
-<li>当数据写入redo log files之后，文件又是怎么样写入磁盘中的呢？<br><img src="https://user-gold-cdn.xitu.io/2020/5/31/17269faf1769f513?w=1142&h=656&f=png&s=161652" alt=""></li>
-</ol>
-<p>在大多数时候，内存中的数据和磁盘中的数据是不一样的，当内存数据页跟磁盘数据页内容不一致的时候，我们称这个内存页为“脏页”。内存数据写入到磁盘后，内存和磁盘上的数据页的内容就一致了，称为“干净页”。</p>
-<p>checkpoint是记录文件当前操作的位置。也就是checkpoint之前的数据表示都已经从内存中刷入磁盘成为了干净页，推进的的过程会不断的对比，遇到干净页则跳过。随着checkpoint会向后不断的移动，数据不断的刷入磁盘文件。直到追上write pos这个位置，表示内存中全部为干净页。从checkpoint到write pos之间的日志表示还没有内存中还存在这么多没有对比的数据。</p>
-<p>write pos是数据操作记录加载进的位置，该位置表示数据操作记录源源不断的写入到了log files，但是还没有进行对比确定成为正真的干净页。当数据写入到ib-logfile-3之后，又会从ib-logfile-0重新写入。形成一个链式循环。从write pos到checkpoint的空间表示可存储空间。</p>
-<p>buffer pool里维护着一个脏页列表，假设现在redo log 的 checkpoint 记录的 LSN 为 10，现在内存中的一干净页有修改，修改后该页的LSN为12，大于 checkpoint 的LSN，则在写redo log的同时该页也会被标记为脏页记录到脏页列表中，现在内存不足，该页需要被淘汰掉，该页会被刷到磁盘，磁盘中该页的LSN为12，该页也从脏页列表中移除，现在redo log 需要往前推进checkpoint，到LSN为12的这条log时，发现内存中的脏页列表里没有该页，且磁盘上该页的LSN也已经为12，则该页已刷脏，已为干净页，跳过</p>
-<p>那什么时候会进行上诉这个刷脏页的过程呢，大概下面四种场景中会进行这种操作：</p>
-<ol>
-<li>第一在上图中write pos快追上checkpoint的时候，表示redo log files文件已经满了，这个时候数据库必须停下来自己的事了，因为在进行日志的写入也不可能往后续添加了。</li>
-<li>第二就是内存数据快要满了，在写入内存数据就需要淘汰一些数据，但是淘汰的数据是还没有写入磁盘中的，这个时候在读出磁盘中的数据就是旧数据，这个时候会发生数据不一致的情况，所以这个时候必须把innodb buffer pool中的脏数据更新到磁盘中，让磁盘中的数据是最新的数据。</li>
-<li>第三就是数据库认为自己不忙的时候，这个时候空闲了下来，数据库就会开启后台线程进行脏页的刷新。比较好理解。</li>
-<li>第四就是正常关闭数据库的时候，数据库需要持久化数据，就需要推进这些redo log files日志文件。在下次正常启动数据库的时候，可以直接从磁盘中读数据文件，不必在去redo log files中刷新文件。速度相对快很多。</li>
-</ol>
-<p>redo log有这种提交机制，那binlog有没有呢？也有，下面就介绍binlog的提交机制：</p>
-<p>sync_binlog = { 0 | n } #这个参数直接影响mysql的性能和完整性</p>
-<p>sync_binlog=0:不同步，日志何时刷到磁盘由FileSystem决定，这个性能最好。</p>
-<p>sync_binlog=n:每写n次binlog日志事件(不是事务)，MySQL将执行一次磁盘同步指令fdatasync()将缓存日志刷新到磁盘日志文件中。</p>
-<p>Mysql中默认的设置是sync_binlog=0，即不同步，这时性能最好，但风险最大。一旦系统奔溃，缓存中的日志都会丢失。</p>
-<p>在innodb的主从复制结构中，如果启用了binlog日志(几乎都会启用)，要保证事务的一致性和持久性的时候，必须将sync_binlog的值设置为1，因为每次事务提交都会写入日志，设置为1就保证了每次事务提交时binlog日志都会写入到磁盘中，从而立即被从服务器复制过去。</p>
-<p>在redo log中为prepare，binlog也提交的数据中，怎么让他们产生依赖恢复数据的呢？<br>答案就是它们有一个共同的数据字段，叫XID。崩溃恢复的时候，会按顺序扫描redo log：</p>
-<p>如果碰到既有prepare、又有commit的redo log，就直接提交；</p>
-<p>如果碰到只有parepare、而没有commit的redo log，就拿着XID去binlog找对应的事务</p>
-<hr>
-<p>为了解决redo log和binlog频繁提交问题，最初mysql引入了redo log的组提交，在mysql5.6中也引入了binlog的组提交。将 binlog 的 commit 阶段分为三个阶段：flush stage、sync stage 以及 commit stage。</p>
-<p>这三个阶段中，每个阶段都会去维护一个队列。</p>
-<p>每个阶段都在维护一个队列，第一个进入该队列的作为 leader 线程，否则作为 follower 线程；leader 线程会收集 follower 的事务，并负责做 sync，follower 线程等待 leader 通知操作完成。详情请看</p>
-<p><a href="https://jin-yang.github.io/post/mysql-group-commit.html" target="_blank" rel="noopener">https://jin-yang.github.io/post/mysql-group-commit.html</a></p>
-<p><strong>其实主要强调的就是，redo log保证事物崩溃时数据的安全恢复，在大多数情况下不直接干预数据的刷盘，和binlog共同保证数据的一致性，在大多数场景下一般开启双1保证数据的不丢失，是保证CrashSafe的根本。所有的优化都是为了减少磁盘io的写入或者延迟写入，增大系统的性能</strong></p>
-<p>参考文章：</p>
-<p><a href="https://www.cnblogs.com/f-ck-need-u/archive/2018/05/08/9010872.html" target="_blank" rel="noopener">https://www.cnblogs.com/f-ck-need-u/archive/2018/05/08/9010872.html</a></p>
-<p><a href="https://www.cnblogs.com/f-ck-need-u/p/9001061.html#blog5" target="_blank" rel="noopener">https://www.cnblogs.com/f-ck-need-u/p/9001061.html#blog5</a></p>
-<p><a href="https://time.geekbang.org/column/intro/100020801" target="_blank" rel="noopener">https://time.geekbang.org/column/intro/100020801</a></p>
-<p><a href="https://jin-yang.github.io/post/mysql-group-commit.html" target="_blank" rel="noopener">https://jin-yang.github.io/post/mysql-group-commit.html</a></p>
+我们先来看一条更新语句的执行过程
+解释一下相关流程
 
-          
+sql经
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/06/01/crash-safe%EF%BC%8Credo-log%E5%92%8Cbinlog%E4%BD%A0%E9%9C%80%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E7%9F%A5%E8%AF%86/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -458,7 +437,7 @@
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="shuaizx">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="image" content="/images/hdImg_9e0cc479c1d3cf63fee27a0bb57814ed1590983454483.jpg">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -494,6 +473,28 @@
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java%E8%99%9A%E6%8B%9F%E6%9C%BA/" itemprop="url" rel="index">
+                    <span itemprop="name">java虚拟机</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -545,74 +546,18 @@
       
         
           
-            <p> 在传统对象分配当中，通常在堆上进行对象实例的分配，但是随着JIT编译器的发展和逃逸分析技术的成熟，在栈上分配内存也不那么绝对了。下面简单介绍逃逸分析、栈上分配、标量替换和锁消除</p>
-<hr>
-<p><strong>逃逸分析</strong></p>
-<p>hotSpot虚拟机可以利用相应算法，判断对象是否逃逸，从而实现对象是否在栈上分配还是堆分配的一项技术。</p>
-<p>逃逸又分为几种情况：</p>
-<p>1、全局逃逸（GlobalEscape）<br>即一个对象的作用范围逃出了当前方法或者当前线程，有以下几种场景：</p>
-<p>对象是一个静态变量</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">static Object global_v;</span><br><span class="line">public static void main(String[] args)&#123;</span><br><span class="line">    new Test().c_method();</span><br><span class="line">&#125;</span><br><span class="line">public void c_method()&#123;</span><br><span class="line">    global_v&#x3D;new Object();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>对象作为当前方法的返回值</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args)&#123;</span><br><span class="line">    new Test().a_method();</span><br><span class="line">&#125;</span><br><span class="line">public StringBuilder a_method()&#123;</span><br><span class="line">    StringBuilder builder &#x3D;new StringBuilder();</span><br><span class="line">    return builder;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          在传统对象分配当中，通常在堆上进行对象实例的分配，但是随着JIT编译器的发展和逃逸分析技术的成熟，在栈上分配内存也不那么绝对了。下面简单介绍逃逸分析、栈上分配、标量替换和锁消除
 
-<p>对象是一个已经发生逃逸的对象</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args)&#123;</span><br><span class="line">    new Test().b_method();</span><br><span class="line">&#125;</span><br><span class="line">public StringBuilder a_method()&#123;</span><br><span class="line">    StringBuilder builder &#x3D;new StringBuilder();</span><br><span class="line">    return builder;</span><br><span class="line">&#125;</span><br><span class="line">public String b_method()&#123;</span><br><span class="line">    StringBuilder builder &#x3D; a_method();</span><br><span class="line">    return builder.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<p>2、参数逃逸（ArgEscape）</p>
-<p>即一个对象被作为方法参数传递或者被参数引用，但在调用过程中不会发生全局逃逸，这个状态是通过被调方法的字节码确定的。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args)&#123;</span><br><span class="line">    new Test().a_method();</span><br><span class="line">&#125;</span><br><span class="line">public String a_method()&#123;</span><br><span class="line">    StringBuilder builder &#x3D;new StringBuilder();</span><br><span class="line">    String s &#x3D; d_method(builder);</span><br><span class="line">    return s;</span><br><span class="line">&#125;</span><br><span class="line">public String d_method(StringBuilder builder)&#123;</span><br><span class="line">    return builder.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>3、没有逃逸<br>即方法中的对象没有发生逃逸。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args)&#123;</span><br><span class="line">    new Test().d_method();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public String d_method()&#123;</span><br><span class="line">    StringBuilder builder &#x3D;new StringBuilder();</span><br><span class="line">    return builder.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>简单的来说，就是对象的生命周期只在局部方法内，没有全局的变量引用或者脱离掉自己作用域的引用。这种对象就没有发生逃逸，可以进一步的优化</p>
-<p>逃逸分析的 JVM 参数如下：</p>
-<p>开启逃逸分析：-XX:+DoEscapeAnalysis</p>
-<p>关闭逃逸分析：-XX:-DoEscapeAnalysis</p>
-<hr>
-<p>1.<strong>栈上分配</strong></p>
-<p>jvm参数配置如下</p>
-<p>-server -Xmx10m -Xms10m -XX:+DoEscapeAnalysis -XX:+PrintGC</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public static void alloc() &#123;</span><br><span class="line">    byte[] b &#x3D; new byte[2];</span><br><span class="line">    b[0] &#x3D; 1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">    long b &#x3D; System.currentTimeMillis();</span><br><span class="line">    for (int i &#x3D; 0; i &lt; 100000000; i++) &#123;</span><br><span class="line">        alloc();</span><br><span class="line">    &#125;</span><br><span class="line">    long e &#x3D; System.currentTimeMillis();</span><br><span class="line">    System.out.println(e - b);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/25/1724a78da4fc920c?w=659&h=514&f=png&s=160900" alt=""></p>
-<p>关闭逃逸分析<br>-server -Xmx10m -Xms10m -XX:+DoEscapeAnalysis -XX:+PrintGC</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/25/1724a7a9164fce6d?w=820&h=790&f=png&s=264863" alt=""></p>
-<p>不仅gc次数大大增加，速度也相差上百倍之多。实现栈上分配的前提是对象必须未发生逃逸，意味着未逃逸的对象都会直接在栈上分配，避免了对象在堆区的生成，产生gc的压力。在java8中以默认开启逃逸分析。意味着我们在写程序时，没有必要把大对象的引用脱离方法作用域。从而实现栈上分配，及时回收。</p>
-<p>2.<strong>标量替换</strong></p>
-<p>标量是指一个不可分割的量，比如基本类型，与标量对应的是聚合量，常见的就是对象，在对象内部还是其他对象属性。在逃逸分析的基础上，聚合量的属性可以成为一个个标量直接在栈上分配，不用在堆分配，用完即丢。标量替换同样在 JDK8 中都是默认开启的</p>
-<p>标量替换的 JVM 参数如下：</p>
-<p>开启标量替换：-XX:+EliminateAllocations</p>
-<p>关闭标量替换：-XX:-EliminateAllocations</p>
-<p>3.<strong>锁消除</strong></p>
-<p>我们知道线程同步锁是非常牺牲性能的，当编译器确定当前对象只有当前线程使用，那么就会移除该对象的同步锁。比如Stringbuffer</p>
-<pre><code>public static void alloc() {
-    StringBuffer buffer = new StringBuffer();
-    System.out.println(&quot;hash: &quot; + buffer.hashCode());
-    System.out.println(ClassLayout.parseInstance(buffer).toPrintable());
-}
-
-public static void main(String[] args) throws InterruptedException {
-    Thread.sleep(5000);
-    long b = System.currentTimeMillis();
-    alloc();
-    long e = System.currentTimeMillis();
-    System.out.println(e - b);
-}</code></pre><p><img src="https://user-gold-cdn.xitu.io/2020/5/29/1725df8b5ead366e?w=1004&h=644&f=png&s=247172" alt=""></p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/25/1724a9165c4172d2?w=580&h=295&f=png&s=227779" alt=""></p>
-<p>按照打印的对象头从高到低打印，表示锁信息的记录为00000001后三位001，对应的表中的锁状态为无锁状态。表明StringBuffer在局部方法内无锁。同步消除同样需要逃逸分析，建立在对象未逃逸的情况下。java8中以默认开启。</p>
-<p>锁消除的 JVM 参数如下：</p>
-<p>开启锁消除：-XX:+EliminateLocks</p>
-<p>关闭锁消除：-XX:-EliminateLocks</p>
-<p>参考文章：</p>
-<p><a href="https://zhuanlan.zhihu.com/p/69136675" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/69136675</a></p>
-<p><a href="https://blog.csdn.net/blueheart20/article/details/52050545" target="_blank" rel="noopener">https://blog.csdn.net/blueheart20/article/details/52050545</a></p>
-
-          
+逃逸分析
+hotSpot虚拟机可以利用相应算法，判断对象是否
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/05/19/%E5%AF%B9%E8%B1%A1%E4%B8%80%E5%AE%9A%E5%9C%A8%E5%A0%86%E4%B8%8A%E5%88%86%E9%85%8D%E5%90%97%EF%BC%9F%E8%AE%BA%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90%E3%80%81%E6%A0%88%E4%B8%8A%E5%88%86%E9%85%8D%E3%80%81%E6%A0%87%E9%87%8F%E6%9B%BF%E6%8D%A2%E5%92%8C%E9%94%81%E6%B6%88%E9%99%A4/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -664,7 +609,7 @@ public static void main(String[] args) throws InterruptedException {
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="shuaizx">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="image" content="/images/hdImg_9e0cc479c1d3cf63fee27a0bb57814ed1590983454483.jpg">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -700,6 +645,28 @@ public static void main(String[] args) throws InterruptedException {
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java%E8%99%9A%E6%8B%9F%E6%9C%BA/" itemprop="url" rel="index">
+                    <span itemprop="name">java虚拟机</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -751,90 +718,16 @@ public static void main(String[] args) throws InterruptedException {
       
         
           
-            <p>在多线程环境下，比如在spring容器类中定义的变量，如何防止自己的变量被其它线程篡改。想要解决这个问题，不得不提到一个类：ThreadLocal</p>
-<p>ThreadLocal的业务场景是什么？我们怎么用好这个类？你知道ThreadLocal的内存泄漏吗？当我们知道ThreadLocal的原理之后，这个问题也会迎刃而解。</p>
-<p>我们首先看一下ThreadLocal的常用Api实现</p>
-<p><strong>set过程</strong></p>
-<hr>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public void set(T value) &#123;</span><br><span class="line">    Thread t &#x3D; Thread.currentThread();</span><br><span class="line">    ThreadLocalMap map &#x3D; getMap(t);</span><br><span class="line">    if (map !&#x3D; null)</span><br><span class="line">        map.set(this, value);</span><br><span class="line">    else</span><br><span class="line">        createMap(t, value);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>步骤讲解</p>
-<ol>
-<li>首先获取当前线程</li>
-<li>getMap是指从当前线程中获取到线程的threadLocals，threadLocals是线程中的一个静态内部类ThreadLocalMap<br>变量为threadLocals<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ThreadLocalMap getMap(Thread t) &#123;</span><br><span class="line">    return t.threadLocals;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ThreadLocal.ThreadLocalMap threadLocals &#x3D; null;</span><br></pre></td></tr></table></figure>
-<ol start="3">
-<li>判断获取到的threadLocals是否为空，不为空插入数据，this为当前Threadlocal对象，value为设置的值，set过程过还伴随着清除的过程，若空间不够，还会对全部的entry进行扫描清除，进行resize</li>
-<li>否则创建threadLocals并设置值，<br>创建ThreadLocalMap过程<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">void createMap(Thread t, T firstValue) &#123;</span><br><span class="line">    t.threadLocals &#x3D; new ThreadLocalMap(this, firstValue);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-ThreadLocalMap内部又是一个继承了弱引用的ThreadLocal的entry数组</li>
-</ol>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/22/1723ba4192aef168?w=647&h=411&f=png&s=97700" alt=""></p>
-<p>new ThreadLocalMap(this, firstValue) 的过程</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ThreadLocalMap(ThreadLocal&lt;?&gt; firstKey, Object firstValue) &#123;</span><br><span class="line">    table &#x3D; new Entry[INITIAL_CAPACITY];</span><br><span class="line">    int i &#x3D; firstKey.threadLocalHashCode &amp; (INITIAL_CAPACITY - 1);</span><br><span class="line">    table[i] &#x3D; new Entry(firstKey, firstValue);</span><br><span class="line">    size &#x3D; 1;</span><br><span class="line">    setThreshold(INITIAL_CAPACITY);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>首先初识化一个Entry数组，entry的key持有ThreadLocal的弱引用，简单介绍一下，弱引用会在jvm发生gc时没有其他强引用关联时而断开弱引用链进行垃圾回收。稍后我会对这个情况进行分析。其次通过threadLocalHashCode找到在entry中的位置，放入到entry中，最后初始化threshold，超过threshold即2/3自动扩容</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">setThreshold(INITIAL_CAPACITY);</span><br><span class="line"></span><br><span class="line">  private void setThreshold(int len) &#123;</span><br><span class="line">            threshold &#x3D; len * 2 &#x2F; 3;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
-<p>归纳一下上面的流程，简要的来说就是ThreadLocal只是一个符号，并不存储任何值，通过当前线程中的ThreadLocalMap存储值，ThreadLocalMap中有一个entry数组，entry数组继承弱引用，在entry放入key，value时，entry会调用父类的构造方法，意思就是entry的key只持有ThreadLocal的弱引用。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Entry(ThreadLocal&lt;?&gt; k, Object v) &#123;</span><br><span class="line">    super(k);</span><br><span class="line">    value &#x3D; v;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>找到一张著名的网图说明一下这个关系链</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/23/1723fb66779b0660?w=714&h=403&f=png&s=160405" alt=""></p>
-<p><strong>get过程</strong></p>
-<hr>
-<p>在我们熟悉set过程之后，get过程更好理解了</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public T get() &#123;</span><br><span class="line">    Thread t &#x3D; Thread.currentThread();</span><br><span class="line">    ThreadLocalMap map &#x3D; getMap(t);</span><br><span class="line">    if (map !&#x3D; null) &#123;</span><br><span class="line">        ThreadLocalMap.Entry e &#x3D; map.getEntry(this);</span><br><span class="line">        if (e !&#x3D; null) &#123;</span><br><span class="line">            @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">            T result &#x3D; (T)e.value;</span><br><span class="line">            return result;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return setInitialValue();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ol>
-<li>首先获取当前线程</li>
-<li>获取到当前线程的ThreadLocalMap</li>
-<li>判断ThreadLocalMap是否为null，为null则跳到第6步初始化</li>
-<li>获取当前threadLocalHashCode对应的entry值</li>
-<li>返回entry的value值，就是在业务中往ThreadLocal设置的那个值</li>
-<li>若为null，初始化值<br>看一下初始化值的操作<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">private T setInitialValue() &#123;</span><br><span class="line">    T value &#x3D; initialValue();</span><br><span class="line">    Thread t &#x3D; Thread.currentThread();</span><br><span class="line">    ThreadLocalMap map &#x3D; getMap(t);</span><br><span class="line">    if (map !&#x3D; null)</span><br><span class="line">        map.set(this, value);</span><br><span class="line">    else</span><br><span class="line">        createMap(t, value);</span><br><span class="line">    return value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-上面段代码简要分析就是初始化值，initialValue返回固定返回一个null，然后下面几段代码在get方法中已经分析了，这里就不在分析。总之就是把null放到entry的value位置，返回null。</li>
-</ol>
-<p>需要注意的是在map.getEntry(this);这里的时候，还额外做了一个操作，就是判断获取到的entry或者entry的key是否为null，因为ThreadLocalMap使用线性地址法存储值，所以还需要依次找下去，直到entry为空为止，并清除掉key为空的entry<br>getEntryAfterMiss(key, i, e)，核心的清除算法见文底，也可以看尾部其他作者讲解threadLocal的详细源码过程。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">private Entry getEntry(ThreadLocal&lt;?&gt; key) &#123;</span><br><span class="line">    int i &#x3D; key.threadLocalHashCode &amp; (table.length - 1);</span><br><span class="line">    Entry e &#x3D; table[i];</span><br><span class="line">    if (e !&#x3D; null &amp;&amp; e.get() &#x3D;&#x3D; key)</span><br><span class="line">        return e;</span><br><span class="line">    else</span><br><span class="line">        return getEntryAfterMiss(key, i, e);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><strong>remove过程</strong></p>
-<hr>
-<p>remove相对于其他两个方法比较简单,核心方法如下所示</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">private void remove(ThreadLocal&lt;?&gt; key) &#123;</span><br><span class="line">    Entry[] tab &#x3D; table;</span><br><span class="line">    int len &#x3D; tab.length;</span><br><span class="line">    int i &#x3D; key.threadLocalHashCode &amp; (len-1);</span><br><span class="line">    for (Entry e &#x3D; tab[i];</span><br><span class="line">         e !&#x3D; null;</span><br><span class="line">         e &#x3D; tab[i &#x3D; nextIndex(i, len)]) &#123;</span><br><span class="line">        if (e.get() &#x3D;&#x3D; key) &#123;</span><br><span class="line">            e.clear();</span><br><span class="line">            expungeStaleEntry(i);</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ol>
-<li>找到threadLocalHashCode所在的位置，也就是threadLocal在entry中的位置</li>
-<li>因为Entry是以线地址法解决冲突而放进去的值，所以需要沿着线遍历找到正确的值</li>
-<li>清除threadlocal的引用</li>
-<li>对后续的值进行段式清除</li>
-</ol>
-<p>其中主要的是expungeStaleEntry这个方法，这也是get、set方式清除无效引用的核心方法，以下解析截取自<a href="https://www.cnblogs.com/micrari/p/6790229.html" target="_blank" rel="noopener">https://www.cnblogs.com/micrari/p/6790229.html</a></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * 这个函数是ThreadLocal中核心清理函数，它做的事情很简单：</span><br><span class="line"> * 就是从staleSlot开始遍历，将无效（弱引用指向对象被回收）清理，即对应entry中的value置为null，将指向这个entry的table[i]置为null，直到扫到空entry。</span><br><span class="line"> * 另外，在过程中还会对非空的entry作rehash。</span><br><span class="line"> * 可以说这个函数的作用就是从staleSlot开始清理连续段中的slot（断开强引用，rehash slot等）</span><br><span class="line"> *&#x2F;</span><br><span class="line">private int expungeStaleEntry(int staleSlot) &#123;</span><br><span class="line">    Entry[] tab &#x3D; table;</span><br><span class="line">    int len &#x3D; tab.length;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 因为entry对应的ThreadLocal已经被回收，value设为null，显式断开强引用</span><br><span class="line">    tab[staleSlot].value &#x3D; null;</span><br><span class="line">    &#x2F;&#x2F; 显式设置该entry为null，以便垃圾回收</span><br><span class="line">    tab[staleSlot] &#x3D; null;</span><br><span class="line">    size--;</span><br><span class="line"></span><br><span class="line">    Entry e;</span><br><span class="line">    int i;</span><br><span class="line">    for (i &#x3D; nextIndex(staleSlot, len); (e &#x3D; tab[i]) !&#x3D; null; i &#x3D; nextIndex(i, len)) &#123;</span><br><span class="line">        ThreadLocal&lt;?&gt; k &#x3D; e.get();</span><br><span class="line">        &#x2F;&#x2F; 清理对应ThreadLocal已经被回收的entry</span><br><span class="line">        if (k &#x3D;&#x3D; null) &#123;</span><br><span class="line">            e.value &#x3D; null;</span><br><span class="line">            tab[i] &#x3D; null;</span><br><span class="line">            size--;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            &#x2F;*</span><br><span class="line">             * 对于还没有被回收的情况，需要做一次rehash。</span><br><span class="line">             * </span><br><span class="line">             * 如果对应的ThreadLocal的ID对len取模出来的索引h不为当前位置i，</span><br><span class="line">             * 则从h向后线性探测到第一个空的slot，把当前的entry给挪过去。</span><br><span class="line">             *&#x2F;</span><br><span class="line">            int h &#x3D; k.threadLocalHashCode &amp; (len - 1);</span><br><span class="line">            if (h !&#x3D; i) &#123;</span><br><span class="line">                tab[i] &#x3D; null;</span><br><span class="line">                </span><br><span class="line">                &#x2F;*</span><br><span class="line">                 * 在原代码的这里有句注释值得一提，原注释如下：</span><br><span class="line">                 *</span><br><span class="line">                 * Unlike Knuth 6.4 Algorithm R, we must scan until</span><br><span class="line">                 * null because multiple entries could have been stale.</span><br><span class="line">                 *</span><br><span class="line">                 * 这段话提及了Knuth高德纳的著作TAOCP（《计算机程序设计艺术》）的6.4章节（散列）</span><br><span class="line">                 * 中的R算法。R算法描述了如何从使用线性探测的散列表中删除一个元素。</span><br><span class="line">                 * R算法维护了一个上次删除元素的index，当在非空连续段中扫到某个entry的哈希值取模后的索引</span><br><span class="line">                 * 还没有遍历到时，会将该entry挪到index那个位置，并更新当前位置为新的index，</span><br><span class="line">                 * 继续向后扫描直到遇到空的entry。</span><br><span class="line">                 *</span><br><span class="line">                 * ThreadLocalMap因为使用了弱引用，所以其实每个slot的状态有三种也即</span><br><span class="line">                 * 有效（value未回收），无效（value已回收），空（entry&#x3D;&#x3D;null）。</span><br><span class="line">                 * 正是因为ThreadLocalMap的entry有三种状态，所以不能完全套高德纳原书的R算法。</span><br><span class="line">                 *</span><br><span class="line">                 * 因为expungeStaleEntry函数在扫描过程中还会对无效slot清理将之转为空slot，</span><br><span class="line">                 * 如果直接套用R算法，可能会出现具有相同哈希值的entry之间断开（中间有空entry）。</span><br><span class="line">                 *&#x2F;</span><br><span class="line">                while (tab[h] !&#x3D; null) &#123;</span><br><span class="line">                    h &#x3D; nextIndex(h, len);</span><br><span class="line">                &#125;</span><br><span class="line">                tab[h] &#x3D; e;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F; 返回staleSlot之后第一个空的slot索引</span><br><span class="line">    return i;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>ThreadLocal的常见问题</strong></p>
-<hr>
-<ol>
-<li>gc后key一定会为null吗，get为什么还可以获取到值</li>
-</ol>
-<p>在我们使用ThreadLocal的时候，常使用全局的final static来修饰ThreadLocal变量,这种变量的生命周期和jvm一样长，存放在jvm的方法区内，会一直保持有保持对ThreadLocal的强引用，所有不管jvm何时gc，只要我们持有这种引用关系，ThreadLocal就不会被回收，ThreadLocal不被回收，弱引用关系自然也存在，我们也就可以获取到他的值。举个String类型的弱引用看一下就可以很清楚的明白这个关系,ThreadLocal道理也是如此</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">WeakReference&lt;String&gt; staticString&#x3D;new WeakReference&lt;&gt;(test);</span><br><span class="line">WeakReference&lt;String&gt; ordinaryString&#x3D;new WeakReference&lt;&gt;(new String(&quot;ordinaryString&quot;));</span><br><span class="line">System.out.println(staticString.get());</span><br><span class="line">System.out.println(ordinaryString.get());</span><br><span class="line">System.gc();</span><br><span class="line">System.out.println(staticString.get());</span><br><span class="line">System.out.println(ordinaryString.get());</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/23/172410fa2893fa38?w=876&h=499&f=png&s=222924" alt=""><br>2. 为什么ThreadLocalMap内部是entry数组，而不是单个entry</p>
-<p>因为在一个线程中，不止我们使用的ThreadLocal，还存在其他地方设置的ThreadLocal，比如Tomcat内，在idea环境中看一下实际情况</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/23/1724115ae0fa041d?w=941&h=474&f=png&s=235473" alt=""><br>在我们还没有设置ThreadLocal自己的值的时候，在线程内已经存在了三个ThreadLocal设置的值，所有说需要我们用一个Entry数组来接收不同的ThreadLocal对象设置的值<br>3. 为什么ThreadLocalMap中的Entry不用强引用，而继承WeakReference</p>
-<p>因为在我们开发过程中，经常使用线程池进行线程的链接复用，如果用强引用的话，会造成我们已经离开的ThreadLocaL变量的作用域，而ThreadLoca却迟迟得不到回收，下面我通过画一张图来说明这个情况<br><img src="https://user-gold-cdn.xitu.io/2020/5/23/17241266810ed456?w=964&h=444&f=png&s=168182" alt=""><br>若使用强引用方式，在ThreadLocal ref断开之后，但是entry中的key和ThreadLocal对象的引用却没有断开，在之后也没有对ThreadLocal进行remove，在后续线程不进行使用或者不正确的使用下，则会发生内存泄漏或者数据混乱</p>
-<ol start="4">
-<li>真的会内存泄漏吗</li>
-</ol>
-<p>在正常情况下，我们对线程池进行使用，在对在ThreadLocal进行set、get时ThreadLocalMap内部都会对entry数组进行expungeStaleEntry操作，在扩容时还会进行全量清除，在网上的篇子中常说会持有 当前线程-&gt;当前线程的threadLocals(ThreadLocal.ThreadLocalMap对象）-&gt;Entry数组-&gt;某个entry.value】，并且key为null的情况，但是在同一个线程对同一个ThreadLocal进行expungeStaleEntry会自我清理，在set的时候又会重新设置进这个位置，key为null的情况又被还原了，因为threadLocalHashCode在同一个ThreadLocal对象下值不会变。除非线程池线程不在使用，或者ThreadLocalMap无法扩容或者无法遍历到entry中这个位置，这种情况下才会发生内存泄漏，但是为了安全，请保持好良好的编码习惯，及时remove<br>5. 为什么会数据混乱</p>
-<p>在我们对ThreadLocal进行使用的时候，没有良好的编码习惯，对ThreadLocal没有进行remove，并且在进行逻辑判断的时候还意外的进入了get方法内，没有进行set，这个时候就会把上次设置进的值重新取出来，造成数据的紊乱。举个列子：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">        ThreadPoolExecutor threadPoolExecutor &#x3D; new ThreadPoolExecutor(1, 1, 10, TimeUnit.SECONDS, new ArrayBlockingQueue(10));</span><br><span class="line">        &#x2F;&#x2F;i代值不同的用户</span><br><span class="line">        for (int i&#x3D;0;i&lt;5;i++)&#123;</span><br><span class="line">            threadPoolExecutor.execute(()-&gt;&#123;</span><br><span class="line">                String name &#x3D; Thread.currentThread().getName();</span><br><span class="line">                System.out.println(name);</span><br><span class="line">                if(Math.random()&gt;0.6)&#123;</span><br><span class="line">                    threadLocal.set((int)(Math.random()*1000000));</span><br><span class="line">                    System.out.println(threadLocal.get());</span><br><span class="line">                &#125;else &#123;</span><br><span class="line">                    System.out.println(threadLocal.get());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/23/172414f2925a14c0?w=1372&h=658&f=png&s=318983" alt=""><br>只取一个线程，代表复用这个线程，不断的执行业务代码，当我们第一次进入到(int)(Math.random()*1000000)的时候，设置进了值，但是我们没有remove，在下次判断的时候又没有进入set里面，导致还是取用了上次的值，导致数据混乱，所以说还是要养成良好的编码习惯，及时remove</p>
-<p>以下是我看过的最精彩的一篇ThreadLocal源码文章，详细讲解了阶段清除和全量清除的步骤：</p>
-<p>参考文章：<a href="https://www.cnblogs.com/micrari/p/6790229.html" target="_blank" rel="noopener">https://www.cnblogs.com/micrari/p/6790229.html</a></p>
-
-          
+          在多线程环境下，比如在spring容器类中定义的变量，如何防止自己的变量被其它线程篡改。想要解决这个问题，不得不提到一个类：ThreadLocal
+ThreadLocal的业务场景是什么？我们怎么用好这个类？你知道ThreadLocal的内
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/05/07/%E6%B5%85%E5%97%91ThreadLocal%E4%B9%8B%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -886,7 +779,7 @@ ThreadLocalMap内部又是一个继承了弱引用的ThreadLocal的entry数组</
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="shuaizx">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="image" content="/images/hdImg_9e0cc479c1d3cf63fee27a0bb57814ed1590983454483.jpg">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -922,6 +815,28 @@ ThreadLocalMap内部又是一个继承了弱引用的ThreadLocal的entry数组</
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index">
+                    <span itemprop="name">java基础</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -973,139 +888,17 @@ ThreadLocalMap内部又是一个继承了弱引用的ThreadLocal的entry数组</
       
         
           
-            <p>所谓异步调用其实就是实现一个可无需等待被调用函数的返回值而让操作继续运行的方法。在 Java 语言中，简单的讲就是另启一个线程来完成调用中的部分计算，使调用继续运行或返回，而不需要等待计算结果。但调用者仍需要取线程的计算结果。</p>
-<hr>
-<p>在并发时代，我们常用多线程来进行异步编程，但是多线程有一个缺点，就是不容易获取线程执行后的值，尽管用一些奇招可以获取，但是这已经远离了我们的初衷。java 1.5提供了一个future接口,可以对线程中的执行状态进行cancle，判断isCancelled，isDone。利用多线程来获取异步执行后的值，但是也有着诸多的缺点，比如</p>
-<ol>
-<li>future没有异常处理程序，通常在future中异常后线程会一直阻塞在内部，造成异常抛不出，线程也退出不了</li>
-</ol>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/1720976ad6f6652e?w=724&h=448&f=png&s=159603" alt=""></p>
-<p>future中的get超时方法可以解决这个问题，但是若是方法还没有执行完，超时时间也过，又会出现超时异常的问题</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">V get(long timeout, TimeUnit unit)</span><br></pre></td></tr></table></figure>
+          所谓异步调用其实就是实现一个可无需等待被调用函数的返回值而让操作继续运行的方法。在 Java 语言中，简单的讲就是另启一个线程来完成调用中的部分计算，使调用继续运行或返回，而不需要等待计算结果。但调用者仍需要取线程的计算结果。
 
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/1720977a0c991e68?w=772&h=497&f=png&s=251163" alt=""></p>
-<ol start="2">
-<li>无法进行链式调用，比如我完成了这个异步任务，接着我还想用这个调用的结果完成下一个任务的调用，future无法直接做到。</li>
-<li>无法对多个调用结果进行并行计算，比如我只在其中一个执行成功后就退出，不再执行其他方法，又或者我想全部完成后在统一计算。</li>
-<li>不能在无阻塞的情况下进行其他计算，只能在阻塞方法 get之后进行其他步骤的操作</li>
-</ol>
-<p>想要用好future确实需要考虑特别多的情况。在java 8中，引入了CompletableFuture，它实现了future接口和CompletionStage接口，规定了异步计算契约的规范，并提供了他们的实现。</p>
-<p>大概的归类一下：</p>
-<ol>
-<li>以async结尾的方法都会以传入的线程池或者默认的forkjoin线程池执行任务，否则以刚才执行任务的线程继续执行</li>
-<li>以then开头的方法会继续刚才的CompletableFuture执行，实现链式调用</li>
-<li>中间带有accept的函数，传入类型是一个消费型接口Consumer，该接口接受上一个函数的值并消费,且不返回任何结果</li>
-<li>中间带有apply的函数，传入一个函数型funtion接口，该接口接受上一个结果的值并且返回计算后的值，可以用get()接收</li>
-<li>中间带有run的函数，传入一个Runnable类型，该接口不会接收值并且进行消费，不会返回值。</li>
-<li>中间带有combine或者both由两个阶段触发，可以计算他们两个结果产生的影响,不同的是combine有返回值，而both没有返回值</li>
-<li>中间带有Compose和带有apply的意思相同，但是不一样的是Compose方法会生成一个新的CompletableFuture对象继续执行，apply会继续连接刚才传入的CompletableFuture对象执行完该函数</li>
-</ol>
-<p>以上的函数api相互兼容，比如thenApplyAsync 执行上一个函数，函数型接口，新线程异步执行</p>
-<p>需要注意的是forkjoin的线程会以守护线程的方式执行，在虚拟机中main线程会在非守护线程执行完之后退出，守护线程没有执行完在控制台上看不到结果</p>
-<hr>
-<p>我们先简单的生成一个CompletableFuture</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; completableFuture &#x3D; new CompletableFuture&lt;String&gt;();</span><br></pre></td></tr></table></figure>
-<p>然后用get方法获取结果</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String result &#x3D; completableFuture.get();</span><br></pre></td></tr></table></figure>
-<p>当然我们的completableFuture什么都没有做，所以get方法会一直阻塞，我们需要在get前面执行complete方法</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">completableFuture.complete(&quot;Future&#39;s shuaizx&quot;);</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/172095b7e1473930?w=739&h=390&f=png&s=140126" alt=""></p>
-<p>或者我们也可以在get方法之前抛出一个异常</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">completableFuture.completeExceptionally(new RuntimeException());</span><br></pre></td></tr></table></figure>
-
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/172095ca9b31f666?w=895&h=471&f=png&s=256245" alt=""></p>
-<p>一切都在我们的预料当中，但是别忘了我们需要的是异步执行，所以我们开启一个线程来执行这些方法</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">   CompletableFuture&lt;String&gt; completableFuture&#x3D;new CompletableFuture&lt;&gt;();</span><br><span class="line">   new Thread(new Runnable() &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        completableFuture.complete(&quot;shuaizx&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).start();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   System.out.println(&quot;start&quot;);</span><br><span class="line">   System.out.println(completableFuture.get());</span><br><span class="line">   System.out.println(&quot;end&quot;);</span><br></pre></td></tr></table></figure>
-
-
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/172097f14b41277d?w=714&h=504&f=png&s=155577" alt=""></p>
-<p>如果只是这样做的话和future没有任何的区别，在新的线程中抛出异常，在外部get还是获取不到结果,也不能中断执行。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">public static String get() &#123;</span><br><span class="line">    if(true)&#123;</span><br><span class="line">        throw new  RuntimeException();</span><br><span class="line">    &#125;</span><br><span class="line">    return &quot;shuaizx&quot;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public static void main(String[] args) throws Exception &#123;</span><br><span class="line">    CompletableFuture&lt;String&gt; completableFuture &#x3D; new CompletableFuture&lt;&gt;();</span><br><span class="line">    new Thread(new Runnable() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void run() &#123;</span><br><span class="line">            String value &#x3D; get();</span><br><span class="line">            completableFuture.complete(value);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;).start();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    System.out.println(&quot;start&quot;);</span><br><span class="line">    System.out.println(completableFuture.get());</span><br><span class="line">    System.out.println(&quot;end&quot;);</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/17209883996c1454?w=775&h=637&f=png&s=299514" alt=""></p>
-<p>我们需要对线程内的异常进行捕获，重新组装一个completeExceptionally抛出去，这至少可以让我们外部正确处理，不再让get阻塞</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">public static String get() &#123;</span><br><span class="line">    if(true)&#123;</span><br><span class="line">        throw new  RuntimeException();</span><br><span class="line">    &#125;</span><br><span class="line">    return &quot;shuaizx&quot;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public static void main(String[] args) throws Exception &#123;</span><br><span class="line">    CompletableFuture&lt;String&gt; completableFuture &#x3D; new CompletableFuture&lt;&gt;();</span><br><span class="line">    new Thread(new Runnable() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void run() &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                String value &#x3D; get();</span><br><span class="line">                completableFuture.complete(value);</span><br><span class="line">            &#125;catch (Exception e)&#123;</span><br><span class="line">                completableFuture.completeExceptionally(e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;).start();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    System.out.println(&quot;start&quot;);</span><br><span class="line">    System.out.println(completableFuture.get());</span><br><span class="line">    System.out.println(&quot;end&quot;);</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/1720989d1ffc7702?w=914&h=660&f=png&s=352766" alt=""></p>
-<p>是不是体验很不错了，至少我们不会因为异常不能抛出而感到苦恼了，但是在CompletableFuture内部已经给我们提供了静态方法，可以不用每次都写这种面条式的代码，下面介绍一下这几个方法：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture.runAsync(Runnable runnable);</span><br><span class="line">CompletableFuture.runAsync(Runnable runnable, Executor executor);</span><br><span class="line"></span><br><span class="line">CompletableFuture.supplyAsync(Supplier&lt;U&gt; supplier);</span><br><span class="line">CompletableFuture.supplyAsync(Supplier&lt;U&gt; supplier, Executor executor)</span><br></pre></td></tr></table></figure>
-<p>在这里介绍一下runAsync函数参数为Runnable，函数无返回值。<br>Supplier为java 8新增的函数式接口，供给型接口，说白就是一个容器，可以存储执行后的值，在最后调用get方法获取值，如果没有传入Executor线程池参数，系统会给我们安排自定义的ForkJoinPool线程，帮我们生成线程，执行任务。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">@FunctionalInterface</span><br><span class="line">public interface Supplier&lt;T&gt; &#123;</span><br><span class="line"></span><br><span class="line">    &#x2F;**</span><br><span class="line">     * Gets a result.</span><br><span class="line">     *</span><br><span class="line">     * @return a result</span><br><span class="line">     *&#x2F;</span><br><span class="line">    T get();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>举一个简单的例子</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; completableFuture &#x3D; CompletableFuture.supplyAsync(()-&gt;&quot;shuaizx&quot;);</span><br><span class="line"></span><br><span class="line">System.out.println(&quot;start&quot;);</span><br><span class="line">System.out.println(completableFuture.get());</span><br><span class="line">System.out.println(&quot;end&quot;);</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/172099bc94934d7f?w=860&h=382&f=png&s=134078" alt=""></p>
-<p>CompletableFuture.runAsync(Runnable runnable)方法接受Runnable参数<br>举例：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture.runAsync(() -&gt; &#123;</span><br><span class="line">    System.out.println(&quot;start&quot;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/17236391a7af643f?w=761&h=390&f=png&s=165998" alt=""></p>
-<p>如此简单就可以实现一个自定义的异步执行计划</p>
-<p><strong>基本api讲解CompletableFuture</strong></p>
-<hr>
-<ol>
-<li>消费型接口</li>
-</ol>
-<p>thenAccept传入Consumer型的接口，只消费不返回值，thenAcceptAsync传入自定义的线程池或者forkjoin线程池,以下消费型api遵循此规则，不过多介绍</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/1723640e3ccf63d2?w=744&h=379&f=png&s=160727" alt=""></p>
-<p>thenAcceptBoth是用来合并结果当两个CompletionStage都正常执行的时候就会执行提供的action</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">CompletableFuture&lt;Integer&gt; future &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    return 10;</span><br><span class="line">&#125;);</span><br><span class="line">System.out.println(future.thenAcceptBoth(CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    return 20;</span><br><span class="line">&#125;),(x,y) -&gt; System.out.println(x+y)).get());</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/17236e59af50e556?w=793&h=494&f=png&s=203882" alt=""></p>
-<p>whenComplete消费型接口，传入数据和异常值，不管是否异常都会继续执行,只消费不返回</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; futureSatrt &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    return &quot;start&quot;;</span><br><span class="line">&#125;).whenComplete((t,e)-&gt;&#123;</span><br><span class="line">    System.out.println(t);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">System.out.println(futureSatrt.get());</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/1723665aba40a5ba?w=777&h=482&f=png&s=189127" alt=""></p>
-<p>allOf方法会传入多个CompletableFuture，待全部执行后才返回结果，但是返回的却是一个void，需手动获取，所以不适合作为获取全部结果类型的api</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">CompletableFuture&lt;String&gt; futureSatrt &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    System.out.println(&quot;start is run&quot;);</span><br><span class="line">    return &quot;start&quot;;</span><br><span class="line">&#125;);</span><br><span class="line">CompletableFuture&lt;String&gt; futureEnd &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    System.out.println(&quot;end is run&quot;);</span><br><span class="line">    return &quot;end&quot;;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">System.out.println( CompletableFuture.allOf(futureSatrt, futureEnd).get());</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/1723672d8d16025f?w=708&h=280&f=png&s=96588" alt=""></p>
-<p>幸运的是java8 stream流的产生，可以让我们很简单的获取全部CompletableFuture的运行结果</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/17236774ad4d12bd?w=843&h=677&f=png&s=244060" alt=""></p>
-<p>但是get必须抛出一个受检查异常，我们是否可以不抛出受检异常而获取结果呢，CompletableFuture也提供了一个非受检异常让我们简单的获取结果<br>那就是join</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; futureSatrt &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    System.out.println(&quot;start is run&quot;);</span><br><span class="line">    return &quot;start&quot;;</span><br><span class="line">&#125;);</span><br><span class="line">CompletableFuture&lt;String&gt; futureEnd &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    System.out.println(&quot;end is run&quot;);</span><br><span class="line">    return &quot;end&quot;;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">List&lt;String&gt; collect &#x3D; Stream.of(futureSatrt, futureEnd).map(f -&gt; &#123;</span><br><span class="line">        return f.join();</span><br><span class="line">&#125;).collect(Collectors.toList());</span><br><span class="line"></span><br><span class="line">collect.forEach(s-&gt; System.out.println(s));</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/17236791979bd0e0?w=786&h=640&f=png&s=219085" alt=""></p>
-<ol start="2">
-<li>函数型接口</li>
-</ol>
-<p>thenApply传入一个Function型接口，返回处理后的值，thenApplyAsync需要传入自定义的线程池或者forkjoin线程池，其余不变，以下消费型api遵循此规则，不过多介绍</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/172363e21d939210?w=704&h=386&f=png&s=174433" alt=""></p>
-<p>thenCompose接收一个新的CompletionStage型的函数型接口，返回处理后的值</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; futureSatrt &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    return &quot;start&quot;;</span><br><span class="line">&#125;).thenCompose(r-&gt;CompletableFuture.supplyAsync(()-&gt;&#123;</span><br><span class="line">    return r+&quot;end&quot;;&#125;));</span><br><span class="line"></span><br><span class="line">System.out.println(futureSatrt.get());</span><br></pre></td></tr></table></figure>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/1723653f38ec22a9?w=727&h=435&f=png&s=150297" alt=""></p>
-<p>thenCompose和thenApply的区别，thenApply处理的CompletableFuture和处理后的CompletableFuture是同一个，而thenCompose需要传入新的CompletableFuture，并且处理后的CompletableFuture是一个全新的CompletableFuture</p>
-<p>thenCombine,你可以用thenCombine连接两个不同的CompletableFuture让他们连接起来,返回一个新的CompletableFuture，用get获取结果，可以看到组合两个CompletableFuture返回的新的CompletableFuture不是同一个，和thenAcceptBoth的区别是这个接口会返回值，而thenAcceptBoth只消费</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; futureSatrt &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">            return &quot;start&quot;;</span><br><span class="line">        &#125;);</span><br><span class="line">        CompletableFuture&lt;String&gt; futureEnd &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">            return &quot;end&quot;;</span><br><span class="line">        &#125;);</span><br><span class="line">        CompletableFuture&lt;String&gt; thenCombine &#x3D; futureSatrt.thenCombine(futureEnd, (start, end) -&gt; start + end);</span><br><span class="line">        System.out.println(thenCombine.get());</span><br><span class="line">        System.out.println(futureSatrt);</span><br><span class="line">        System.out.println(futureEnd);</span><br><span class="line">        System.out.println(thenCombine);</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/172364d081e48e6f?w=853&h=275&f=png&s=104688" alt=""></p>
-<p>handle接口类型是函数型接口，传入数据和异常值，不管执行是否出现异常都会执行，和whenComplete相对应，返回处理后的值</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; futureSatrt &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    return &quot;start&quot;;</span><br><span class="line">&#125;).handle((t,e)-&gt;&#123;</span><br><span class="line">    System.out.println(e);</span><br><span class="line">    return t+&quot;end&quot;;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">System.out.println(futureSatrt.get());</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/172365f0e48ad3e2?w=748&h=276&f=png&s=91918" alt=""></p>
-<p>另一个同allof类型的api是anyof，当有一个CompletableFuture运行完时便退出</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; futureSatrt &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    System.out.println(&quot;start is run&quot;);</span><br><span class="line">    return &quot;start&quot;;</span><br><span class="line">&#125;);</span><br><span class="line">CompletableFuture&lt;String&gt; futureEnd &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    System.out.println(&quot;end is run&quot;);</span><br><span class="line">    return &quot;end&quot;;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">Object o &#x3D; CompletableFuture.anyOf(futureSatrt, futureEnd).get();</span><br><span class="line"></span><br><span class="line">System.out.println(o);</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/172367bf6f057c01?w=782&h=577&f=png&s=196795" alt=""><br>运行的是anyof可以让我们获取到执行的值。</p>
-<p>exceptionally可以让我们获取执行的异常并返回自定义的值</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;Object&gt; end &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    System.out.println(&quot;end is run&quot;);</span><br><span class="line">    throw new RuntimeException();</span><br><span class="line">&#125;).exceptionally((e) -&gt; &quot;error&quot;);</span><br><span class="line"></span><br><span class="line">System.out.println(end.get());</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/21/17236816d40c3f78?w=682&h=423&f=png&s=156455" alt=""></p>
-<p>以上只是java8版本的CompletableFuture基本api，在java9时又增加部分api，有兴趣的可以下去了解</p>
-<p><strong>CompletableFuture原理请移步</strong></p>
-<hr>
-<p><a href="http://youngitman.tech/2019/02/13/completablefuture%E6%BA%90%E7%A0%81/" target="_blank" rel="noopener">http://youngitman.tech/2019/02/13/completablefuture%E6%BA%90%E7%A0%81/</a></p>
-<p>参考资料：</p>
-<ol>
-<li><a href="https://yq.aliyun.com/articles/712258" target="_blank" rel="noopener">https://yq.aliyun.com/articles/712258</a></li>
-<li><a href="https://www.cnblogs.com/txmfz/p/11266411.html" target="_blank" rel="noopener">https://www.cnblogs.com/txmfz/p/11266411.html</a></li>
-<li><a href="http://youngitman.tech/2019/02/13/completablefuture%E6%BA%90%E7%A0%81/" target="_blank" rel="noopener">http://youngitman.tech/2019/02/13/completablefuture%E6%BA%90%E7%A0%81/</a></li>
-</ol>
-
-          
+在并发时代
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/04/29/%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E4%B9%8BCompleTableFuture/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1157,7 +950,7 @@ ThreadLocalMap内部又是一个继承了弱引用的ThreadLocal的entry数组</
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="shuaizx">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="image" content="/images/hdImg_9e0cc479c1d3cf63fee27a0bb57814ed1590983454483.jpg">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -1193,6 +986,28 @@ ThreadLocalMap内部又是一个继承了弱引用的ThreadLocal的entry数组</
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/mysql/" itemprop="url" rel="index">
+                    <span itemprop="name">mysql</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -1244,185 +1059,18 @@ ThreadLocalMap内部又是一个继承了弱引用的ThreadLocal的entry数组</
       
         
           
-            <p>什么是索引，为什么要索引，这是熟悉数据库必不可少的知识。简单的来说，<strong>索引就是利用合理的数据结构来提高查询数据的效率</strong>。让我们通过这种数据结构而快速的找到我们想要的数据。</p>
-<p><strong>常见的索引模型</strong></p>
-<hr>
-<p>从数据结构来说有B+树索引、hash索引、FULLTEXT索引、R-Tree索引，此处介绍hash索引和b+树索引</p>
-<ul>
-<li><p>hash索引</p>
-<p>  hash索引顾名思义就是利用key-value存储数据的一种结构，只需要我们输入key，就能找到匹配的value，hash索引常用来匹配等值查询的场景，在mysql中MEMORY默认使用哈希索引。MEMORY用到的很少，因为它是把数据存到内存中，如果内存出现异常就会影响数据。如果重启或者关机，所有数据都会消失，不过在真实业务中key-value的查询常用nosql数据库来进行存储，此处不过多介绍。</p>
-</li>
-<li><p>B+树索引</p>
-<p>  b+树索引是innodb中b—tree索引的实现，为什么用B+树作为innodb索引的实现呢？因为磁盘的存储原理决定了b+树是最适合它的存储模型。</p>
-</li>
-</ul>
-<pre><code>在innodb中磁盘以页为单位，一页等于16K，我们访问磁盘的时候访问的是逻辑分区，机器扫描计算机对应的物理分区。随机io的时候扫描不同的磁盘需要磁头不停的移动，我们需要的数据可能分布在不同的页中，在没有任何索引的数据库中寻找数据，此时数据库相当于一个文件系统，需要cpu进行全表扫描。而b+树的一棵树对应innodb的一页，我们每次访问数据库只需要加载对应的页，从树的节点一直找下去，在固定的次数总会在叶子节点找到响应的数据，b+这种数据结构完美的契合了innodb这种以页为单位的存储引擎。下图为无索引情况下全图扫描</code></pre><p><img src="https://user-gold-cdn.xitu.io/2020/5/11/17203d23dd21f6d0?w=596&h=391&f=png&s=73224" alt=""></p>
-<p>  <strong>为什么不用b树作为innodb索引的数据结构？</strong></p>
-<hr>
-<p>先看一下b树的数据结构模型</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/11/17203da298ad1acc?w=640&h=263&f=png&s=52058" alt=""></p>
-<p>在b树这种数据结构中，数据存储在节点之内，在查找数据的时候运气好可以快速在前面的节点中找到，但是，当数据是范围查询的时候，数据分配在不同的节点，cpu会进行多次io来遍历节点来进行查找数据，此时性能会极速下降。b树存在不稳定的查询性能。</p>
-<p>重点，innodb的b-tree实现，b+树，先看图<br><img src="https://user-gold-cdn.xitu.io/2020/5/11/17203e069ac2266c?w=761&h=492&f=png&s=29646" alt=""></p>
-<p>在b+树这种数据结构中，数据都存储在叶子中，非叶子结构存储着数据的指针，数据的左节点都比自己小，右节点都大于等于自己。底层的叶子节点数据头尾用链表串联起来。这种数据每次查询的次数稳定，范围查询时在底层用链表顺序查询，大大提高的查询效率。</p>
-<p><strong>b+树与b树比较</strong></p>
-<ul>
-<li>单一节点存储的元素更多，使得查询的IO次数更少，所以也就使得它更适合做为数据库MySQL的底层数据结构了。</li>
-<li>所有的查询都要查找到叶子节点，查询性能是稳定的，而B树，每个节点都可以查找到数据，所以不稳定。</li>
-<li>所有的叶子节点形成了一个有序链表，更加便于查找。</li>
-</ul>
-<p><strong>从索引类型上来看索引又分为聚簇索引和非聚簇索引</strong></p>
-<p> 聚簇索引简单的来说就是所有的辅助索引都需要通过查找主键索引，从而查询真实数据的一个过程。而非聚簇索引中主键索引和辅助索引在叶子节点中都存储着数据的指针。需要查询真实的物理指针才能找到真实的数据。聚簇索引的代表是innodb，非聚簇索引的代表是myisam。</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/11/17203ed42f1f45c1?w=633&h=461&f=png&s=93983" alt=""></p>
-<p>在聚簇索引中主键索引叶子节点存储的是数据，既是索引又是文件。innodb牺牲了空间换取了时间。而非聚簇索引牺牲时间换空间。</p>
-<p><strong>索引的选择</strong></p>
-<hr>
-<p>只要我们建立了索引，数据库优化的时候肯定会利用到索引吗？并不是，在mysql server层优化器进行选择的时候，会对索引进行一个采样，若cardinality太小,优化器不会利用到索引，会进行全表扫描。优化器索引规则查询sql如下</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">show index from &lt;table&gt;</span><br></pre></td></tr></table></figure>
+          什么是索引，为什么要索引，这是熟悉数据库必不可少的知识。简单的来说，索引就是利用合理的数据结构来提高查询数据的效率。让我们通过这种数据结构而快速的找到我们想要的数据。
+常见的索引模型
 
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/172069a53f723ce3?w=1208&h=427&f=png&s=104846" alt=""></p>
-<p>索引利用到两种采样算法</p>
-<p>index dive: 速度慢,但能得到精确的值（MySQL的实现是数索引对应的索引项个数，所以精确）</p>
-<p>index statistics: 速度快,但得到的值未必精确<br><strong>索引的优化</strong></p>
-<ol>
-<li><strong>覆盖索引</strong></li>
-</ol>
-<hr>
-<p>在普通的索引查询中当中，当辅助索引查询到主键时，还需要从主键索引中查询数据，这个过程叫做回表。比如在一个表T中，表的初始化语句是</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">create table T (</span><br><span class="line">ID int primary key,</span><br><span class="line">k int NOT NULL DEFAULT 0,</span><br><span class="line">s varchar(16) NOT NULL DEFAULT &#39;&#39;,</span><br><span class="line">index k(k))</span><br><span class="line">engine&#x3D;InnoDB;</span><br></pre></td></tr></table></figure>
-
-<p>数据库插入数据</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">insert into T values(100,1, &#39;aa&#39;),(200,2,&#39;bb&#39;),(300,3,&#39;cc&#39;),(500,5,&#39;ee&#39;),(600,6,&#39;ff&#39;),(700,7,&#39;gg&#39;);</span><br></pre></td></tr></table></figure>
-
-<p>数据库执行查询语句</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from T where k between 3 and 5</span><br></pre></td></tr></table></figure>
-<pre><code>数据库索引的执行过程为</code></pre><p><img src="https://user-gold-cdn.xitu.io/2020/5/11/172044f5f5816e41?w=1142&h=856&f=png&s=169650" alt=""></p>
-<ul>
-<li><p>在k索引树上找到k=3的记录，取得 ID = 300；</p>
-</li>
-<li><p>再到ID索引树查到ID=300对应的R3；</p>
-</li>
-<li><p>在k索引树取下一个值k=5，取得ID=500；</p>
-</li>
-<li><p>再回到ID索引树查到ID=500对应的R4；</p>
-</li>
-<li><p>在k索引树取下一个值k=6，不满足条件，循环结束。</p>
-</li>
-</ul>
-<p>现在我们查询的是全部的数据，只有在主键索引上才又全部的数据，所以不得不回表，但是如果我们只需要获取主键id，那我们是不是就可以不需要再次回到主键索引去查询了呢？</p>
-<p>比如</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select id from T where id between 3 and 5</span><br></pre></td></tr></table></figure>
-<p>这次我们的执行顺序为</p>
-<ul>
-<li><p>在k索引树上找到k=3的记录，取得 ID = 300；</p>
-</li>
-<li><p>在k索引树取下一个值k=5，取得ID=500；</p>
-</li>
-<li><p>在k索引树取下一个值k=6，不满足条件，循环结束</p>
-</li>
-</ul>
-<p>在此次数据的查询中，我们每次都在索引上获取了查询结果，不需要再次回到主键索引才能获取我们需要的结果，这个过程就叫做覆盖索引，在我们的sql中需要有意的用到覆盖索引。避免不必要的查询。我们也可以通过执行计划看出来我们是否使用了覆盖索引。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">explain select id from T where id between 3 and 5</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/11/17204596f283eca9?w=802&h=357&f=png&s=50469" alt=""></p>
-<p><strong>在最后extra列中显示 using index表示此次sql的执行用到的覆盖索引</strong></p>
-<p>那是不是查询全表的sql就利用不到覆盖索引了呢？再举一个常见的例子</p>
-<p>我们在大数据量中的数据查询中常使用到分页查询，在下面的例子中，全表数据量在226w左右</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/172067fbd38b9536?w=647&h=724&f=png&s=379308" alt=""></p>
-<p>我们执行数据库查询语句</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * from &#96;phone_insurance_order_backup_20200318&#96; LIMIT 2000000,10</span><br></pre></td></tr></table></figure>
-<p>执行耗时4.27秒<br><img src="https://user-gold-cdn.xitu.io/2020/5/12/17206842a09bd940?w=487&h=733&f=png&s=135581" alt=""><br>一个最简单的分页查询，数据库会进行扫描前2000010条数据，然后去除不要的前200w条数据。那这个sql有什么问题呢？</p>
-<p>前200w条数据我们都是不需要的，但是却全部进行了查询，然后在丢弃，这都是无意义的查询，我们只需要后十条数据的结果。<br>下面看优化后的sql语句</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * from &#96;phone_insurance_order_backup_20200318&#96; p JOIN (SELECT id from &#96;phone_insurance_order_backup_20200318&#96; limit 2000000,10) t1 on p.id&#x3D;t1.id;</span><br></pre></td></tr></table></figure>
-
-<p>一共耗时395毫秒，性能提高十倍左右。为什么这么一个简单的查询性能提高这么多呢，答案就是利用到了覆盖索引。<br><img src="https://user-gold-cdn.xitu.io/2020/5/12/17206881cc0d135e?w=1028&h=729&f=png&s=239197" alt=""></p>
-<p>在子查询中我们先查询出需要的数据主键id，避免不必要的全表查询全部数据，然后在用子查询查询到的id和表中的主键连接，从而找出来所需的数据。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(SELECT id from &#96;phone_insurance_order_backup_20200318&#96; limit 2000000,10) t1</span><br></pre></td></tr></table></figure>
-
-
-<p>可以看出，覆盖索引可以减少数据库的回表次数，显著的增强了查询性能。覆盖索引是常用的一种优化手段。</p>
-<ol start="2">
-<li><strong>最左前缀匹配</strong></li>
-</ol>
-<hr>
-<p>在数据库中，我们总会对表建立索引，那是不是可以对每一个需要查询的字段都建立索引呢？肯定不是，那我们应该思考一下怎么合适的建立索引。那就需要认识一下b+树的最左前缀匹配原则。</p>
-<p>最左前缀匹配的意思是索引查找最左N个字段，也可以是字符串索引的最左M个字符，不管该索引是普通索引还是联合索引。都可以利用最左前缀匹配来查询数据。举例子：</p>
-<p>表结构为</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE &#96;template_message&#96; (</span><br><span class="line">  &#96;gmt_modified&#96; timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT &#39;记录修改时间&#39;,</span><br><span class="line">  &#96;gmt_create&#96; timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT &#39;记录创建时间&#39;,</span><br><span class="line">  &#96;record_status&#96; tinyint(2) NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;数据记录逻辑删除标识 0 正常 1 已删除&#39;,</span><br><span class="line">  &#96;id&#96; int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT &#39;自增主键&#39;,</span><br><span class="line">  &#96;out_user_id&#96; varchar(64) NOT NULL DEFAULT &#39;&#39; COMMENT &#39;支付宝uid&#39;,</span><br><span class="line">  &#96;form_id&#96; varchar(64) NOT NULL DEFAULT &#39;&#39; COMMENT &#39;form_id或者trade_no&#39;,</span><br><span class="line">  &#96;pay_status&#96; varchar(16) NOT NULL DEFAULT &#39;&#39; COMMENT &#39;支付状态 已支付:already_pay 未支付:no_pay&#39;,</span><br><span class="line">  &#96;send_times&#96; tinyint(2) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;发送次数&#39;,</span><br><span class="line">  &#96;send_date&#96; timestamp NOT NULL DEFAULT &#39;1970-01-01 08:00:01&#39; COMMENT &#39;发送时间&#39;,</span><br><span class="line">  &#96;form_type&#96; varchar(16) NOT NULL DEFAULT &#39;&#39; COMMENT &#39;form_id类型 表单类:form 支付类:trade&#39;,</span><br><span class="line">  &#96;sub_type&#96; varchar(16) NOT NULL DEFAULT &#39; &#39; COMMENT &#39;子类型:业务自定义&#39;,</span><br><span class="line">  &#96;retry_times&#96; tinyint(2) unsigned DEFAULT &#39;0&#39; COMMENT &#39;重试次数&#39;,</span><br><span class="line">  PRIMARY KEY (&#96;id&#96;),</span><br><span class="line">  UNIQUE KEY &#96;out_user_id&#96; (&#96;out_user_id&#96;),</span><br><span class="line">  KEY &#96;idx_form_id&#96; (&#96;form_id&#96;,&#96;retry_times&#96;)</span><br><span class="line">) ENGINE&#x3D;InnoDB AUTO_INCREMENT&#x3D;6 DEFAULT CHARSET&#x3D;utf8 COMMENT&#x3D;&#39;消息模板&#39;;</span><br></pre></td></tr></table></figure>
-
-<p>随便插入几条测试数据</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO &#96;template_message&#96; (&#96;gmt_modified&#96;, &#96;gmt_create&#96;, &#96;record_status&#96;, &#96;id&#96;, &#96;out_user_id&#96;, &#96;form_id&#96;, &#96;pay_status&#96;, &#96;send_times&#96;, &#96;send_date&#96;, &#96;form_type&#96;, &#96;sub_type&#96;, &#96;retry_times&#96;)</span><br><span class="line">VALUES</span><br><span class="line">	(&#39;2020-05-12 14:21:00&#39;, &#39;1970-01-01 08:00:01&#39;, 0, 1, &#39;1&#39;, &#39;0232&#39;, &#39;2&#39;, 2, &#39;1970-01-01 08:00:01&#39;, &#39;&#39;, &#39; &#39;, 1),</span><br><span class="line">	(&#39;2020-05-12 14:21:06&#39;, &#39;2020-03-16 15:44:09&#39;, 0, 4, &#39;4&#39;, &#39;4121&#39;, &#39;&#39;, 0, &#39;1970-01-01 08:00:01&#39;, &#39;&#39;, &#39; &#39;, 0),</span><br><span class="line">	(&#39;2020-05-12 14:21:12&#39;, &#39;2020-03-16 15:44:14&#39;, 0, 5, &#39;5&#39;, &#39;3121&#39;, &#39;&#39;, 0, &#39;1970-01-01 08:00:01&#39;, &#39;&#39;, &#39; &#39;, 5),</span><br><span class="line">	(&#39;2020-05-12 14:21:20&#39;, &#39;1970-01-01 08:00:01&#39;, 0, 6, &#39;6&#39;, &#39;0232&#39;, &#39;2&#39;, 2, &#39;1970-01-01 08:00:01&#39;, &#39;&#39;, &#39; &#39;, 4),</span><br><span class="line">	(&#39;2020-05-12 14:21:26&#39;, &#39;2020-03-16 15:44:09&#39;, 0, 7, &#39;7&#39;, &#39;4121&#39;, &#39;&#39;, 0, &#39;1970-01-01 08:00:01&#39;, &#39;&#39;, &#39; &#39;, 0),</span><br><span class="line">	(&#39;2020-05-12 14:21:31&#39;, &#39;2020-03-16 15:44:14&#39;, 0, 8, &#39;8&#39;, &#39;3121&#39;, &#39;&#39;, 0, &#39;1970-01-01 08:00:01&#39;, &#39;&#39;, &#39; &#39;, 2);</span><br></pre></td></tr></table></figure>
-
-
-<p>查询sql</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EXPLAIN SELECT * from &#96;template_message&#96; where &#96;form_id&#96;  like &#39;312%&#39;</span><br></pre></td></tr></table></figure>
-
-
-
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/172078c6496f50cf?w=884&h=325&f=png&s=65749" alt=""></p>
-<p>可以看到，当我们对form_id进行模糊查询的时候，也是可以用到索引的，但是如果我们把模糊查询的%放到前面进行查询，还可以用到索引吗？试一下</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/1720784936935385?w=780&h=329&f=png&s=53546" alt=""></p>
-<p>显示执行计划中type为all，mysql没有用到索引，进行了全表扫描。</p>
-<p>大家可以试一下查询retry_times是否可以利用到索引。</p>
-<p>这还是针对联合索引单列进行模糊匹配的结果，实际上在此次的(<code>form_id</code>,<code>retry_times</code>)联合索引中，你可以认为数据库对form_id和 （formid,retry_times）都建立了索引，这样理解起来比较方便。</p>
-<p>b+树这种数据结构就是一颗有序的多叉树。查询从左边进行查询，一一匹配，比如(<code>form_id</code>,<code>retry_times</code>)这种联合索引先对form_id进行排序，再对retry_times进行排序，查询时先查询<br>form_id，再查询retry_times。最左匹配原则就是基于这个道理。所以在建立表索引时，有一个基本原则：</p>
-<p><strong>如果通过调整顺序，可以少维护一个索引，那么这个顺序往往就是需要优先考虑采用的</strong></p>
-<ol start="3">
-<li><strong>索引下推</strong></li>
-</ol>
-<hr>
-<p>如果在上面那个(<code>form_id</code>,<code>retry_times</code>)联合索引中，执行了下面这条语，数据库的执行情况会是怎么样的。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EXPLAIN SELECT * from &#96;template_message&#96; where &#96;form_id&#96;  like &#39;312%&#39; and &#96;retry_times&#96;&#x3D;2</span><br></pre></td></tr></table></figure>
-<p>先看一下这条sql在5.6版本以前的执行情况：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/17207a39806cfad3?w=530&h=393&f=png&s=83545" alt=""></p>
-<p>mysql在数据库中查找满足<code>form_id</code>  like ‘312%’的值，主键为5和8的都满足，所以这两个都需要回表查询，主键为8的这一行不满足，放弃。这个查询一共回表两次。<br>但是在mysql5.6之后，mysql会对查询的索引段继续扫描，排除不满足的索引行。执行情况如下</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/17207a5e888c8096?w=519&h=370&f=png&s=86693" alt=""></p>
-<p>在联合索引中，retry_times为5的索引不满足条件，mysql执行器不会进行回表，此次查询共回表一次。</p>
-<p>索引下推在mysql5.6中自动开启，可以通过设置optimizer_switch([global|session],dynamic)变量开启或者关闭index_condition_push优化功能</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set optimizer_switch&#x3D;’index_condition_pushdown&#x3D;on|off’</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/17207af14640a33a?w=913&h=383&f=png&s=71353" alt=""><br>开启时extra为Using index condition意味着用到了索引下推，关闭则没有<br>Using index condition，没有进行索引下推优化</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/17207b146b1fa70d?w=842&h=325&f=png&s=58984" alt=""></p>
-<ol start="4">
-<li><strong>唯一索引和普通索引选择</strong></li>
-</ol>
-<hr>
-<p>在我们建表的时候，唯一索引常用情况就是防止数据库脏数据的产生，但是唯一索引是否一定优于普通索引呢？<br>在我们读取innodb数据页的时候，并不是一条一条的读取的，innodb会读取一页约16K的数据加载进内存中，然后对数据进行筛选。如果选择普通索引还是唯一索引，不得不提到的一个数据结构叫做change buffer。<br><img src="https://user-gold-cdn.xitu.io/2020/5/12/17207b701b7886d0?w=1142&h=856&f=png&s=269026" alt=""></p>
-<p>下面我们用一条sql语句来讲解change buffer的执行过程：<br>表中有唯一索引限制</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO &#96;template_message&#96; (&#96;gmt_modified&#96;, &#96;gmt_create&#96;, &#96;record_status&#96;, &#96;id&#96;, &#96;out_user_id&#96;, &#96;form_id&#96;, &#96;pay_status&#96;, &#96;send_times&#96;, &#96;send_date&#96;, &#96;form_type&#96;, &#96;sub_type&#96;, &#96;retry_times&#96;)</span><br><span class="line">VALUE (&#39;2020-05-12 14:21:31&#39;, &#39;2020-03-16 15:44:14&#39;, 0, 9, &#39;9&#39;, &#39;3123&#39;, &#39;&#39;, 0, &#39;1970-01-01 08:00:01&#39;, &#39;&#39;, &#39; &#39;, 2);</span><br></pre></td></tr></table></figure>
-<ol>
-<li>数据经过mysql server层到达innodb引擎执行</li>
-<li>数据页在innodb buffer pool中直接更新，两阶段提交</li>
-<li>否则从表中加载数据到innodb buffer pool判断是否唯一性冲突</li>
-<li>无冲突写入innodb buffer pool和两阶段提交</li>
-</ol>
-<p>如果是普通索引上述又会怎么执行？</p>
-<ol>
-<li>数据经过mysql server层到达innodb引擎执行</li>
-<li>数据页在innodb buffer pool中直接更新，两阶段提交</li>
-<li>否则写入change buffer和两阶段提交</li>
-</ol>
-<p>可以看出来唯一索引新增的情况会多从磁盘中扫描一次进行io，那什么时候change buffer会持久化呢？<br>我们再次执行一次普通索引情况的sql过程：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from &#96;template_message&#96; where &#96;form_id&#96;&#x3D;&#39;0232&#39;</span><br></pre></td></tr></table></figure>
-<ol>
-<li>数据经过mysql server层到达innodb引擎执行</li>
-<li>innodb buffer pool中没有命中数据行</li>
-<li>加载数据到innodb buffer pool中并marge change buffer 得到最新的数据页</li>
-<li>返回匹配数据</li>
-</ol>
-<p>大致流程如上，change buffer了访问这个数据页会触发merge外，系统后台有parge线程会定期merge。</p>
-<p>change buffer用的是buffer pool里的内存，因此不能无限增大。change buffer的大小，可以通过参数innodb_change_buffer_max_size来动态设置。这个参数设置为50的时候，表示change buffer的大小最多只能占用buffer pool的50%。</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/5/12/17207ec39b9cc2a0?w=505&h=315&f=png&s=41065" alt=""></p>
-<p>业务上首先要正常，change buffer在满足业务的时候才会考虑使用，想要靠程序来满足唯一，根据墨菲定律，必有脏数据产生（阿里巴巴开发手册）。<br>对于写多读少的业务适合change buffer，如果写入马上读则体现不出change buffer的优点，还要维护change buffer，造成不必要的性能浪费。</p>
-<p>5.其他索引规则</p>
-<ol>
-<li>官方文档显示,字段为null时,如果该字段有索引,查询该字段的时候是走索引的,两个字段组成的复合索引,都为null时,才不走索引</li>
-<li>索引在mysql server层中的优化器中进行索引的选择</li>
-<li>有时候mysql会选错索引，必要的时候可以加 force index强制让mysql选择对应的索引</li>
-</ol>
-<p>参考资料:   <a href="https://time.geekbang.org/column/intro/100020801" target="_blank" rel="noopener">https://time.geekbang.org/column/intro/100020801</a></p>
-
-          
+从数据结构来说有B+树索引、hash索引、FULLTE
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/04/25/%E5%88%9D%E8%AF%86mysql%E7%B4%A2%E5%BC%95/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1491,8 +1139,12 @@ ThreadLocalMap内部又是一个继承了弱引用的ThreadLocal的entry数组</
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
+              <img class="site-author-image" itemprop="image"
+                src="/images/hdImg_9e0cc479c1d3cf63fee27a0bb57814ed1590983454483.jpg"
+                alt="shuaizx" />
+            
               <p class="site-author-name" itemprop="name">shuaizx</p>
-              <p class="site-description motion-element" itemprop="description">java</p>
+              <p class="site-description motion-element" itemprop="description"></p>
           </div>
 
           <nav class="site-state motion-element">
@@ -1509,7 +1161,25 @@ ThreadLocalMap内部又是一个继承了弱引用的ThreadLocal的entry数组</
             
 
             
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
 
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
             
 
           </nav>
