@@ -91,7 +91,7 @@
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/31/17269e8f67d22a98?w=550&h=332&f=png&s=121380">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/31/17269faf1769f513?w=1142&h=656&f=png&s=161652">
 <meta property="article:published_time" content="2020-06-01T02:05:02.000Z">
-<meta property="article:modified_time" content="2020-06-01T03:46:29.235Z">
+<meta property="article:modified_time" content="2020-06-01T06:06:29.215Z">
 <meta property="article:author" content="shuaizx">
 <meta property="article:tag" content="mysql">
 <meta name="twitter:card" content="summary">
@@ -391,7 +391,7 @@
 <p>可见数据并不会直接写入磁盘，而是把记录提交到redo log进行后续操作，写入到redo log到最终写入磁盘的这一个过程被称作WAL技术，在稍后会进行介绍。</p>
 <p>在图中innodb buffer pool有个change buffer，这是innodb对写普通索引写操作所做的优化。详情可见<br><a href="https://shuai1763957837.github.io/2020/04/25/%E5%88%9D%E8%AF%86mysql%E7%B4%A2%E5%BC%95/">https://shuai1763957837.github.io/2020/04/25/%E5%88%9D%E8%AF%86mysql%E7%B4%A2%E5%BC%95/</a> 唯一索引和普通索引的选择。</p>
 <hr>
-<p>第四步的整体叫做两阶段提交。会在这涉及到两个日志文件：redo log和binlog<br>。</p>
+<p>第四步的整体叫做两阶段提交。会在这涉及到两个日志文件：redo log和binlog</p>
 <p>binlog叫做归档日志，是mysql提供的，所有的存储引擎都可以使用这个日志，追加写，日志文件会不断增大，在数据备份时我们就会用到这个文件，binlog只提供归档能力，binlog日志包含了引起或可能引起数据库改变(如delete语句但没有匹配行)的事件信息，但绝不会包括select和show这样的查询语句。语句以”事件”的形式保存，所以包含了时间、事件开始和结束位置等信息。</p>
 <p>redo log 重做日志，是innodb独有的，mysql并没有提供原生的crash-safe能力，另外一个公司以插件的形式提供了innodb引擎，引入了redo log日志。redo log提供了数据的恢复能力，当数据在内存中但是没有更新到磁盘中的时候，数据库宕机，这个时候恢复数据库时会查找redo log的日志，所有commit和redo log是prepare且binlog记录在案的数据都会被恢复，保证了一致性。redo log通常是物理日志，记录的是数据页的物理修改，而不是某一行或某几行修改成怎样怎样，它用来恢复提交后的物理数据页(恢复数据页，且只能恢复到最后一次提交的位置)。</p>
 <p><strong>redo log提供的是事物恢复的能力，意味着大多数情况下并不直接参与数据的刷盘工作，如果是数据库异常重启，数据库才会查找redo log进行事物的对照恢复</strong><br><img src="https://user-gold-cdn.xitu.io/2020/5/29/1725f4f135689095?w=1142&h=856&f=png&s=267851" alt=""></p>
@@ -407,9 +407,9 @@
 </ol>
 <p>从上诉的流程可以知道，不管先进行redo log的写入还是binlog的写入都会造成不一致的情况，因为binlog和redo log都是数据库恢复的重要日志，缺一不可，如果想要保证一致性则需要两阶段提交，让这两个状态保持逻辑上的一致。</p>
 <hr>
-<p>当数据写入redo log之后，怎么写入到磁盘的呢？这就涉及到数据库中的<strong>WAL</strong>技术，WAL的全称是Write-Ahead Logging，它的关键点就是先写日志，再写磁盘。为什么需要先写入redo log，而不是直接写入磁盘？写入磁盘只写入一次，而写redo log再写磁盘需要写入两次，这个就需要了解磁盘的写入过程。</p>
+<p>当数据写入redo log之后，数据最终怎么写入到磁盘的呢？这就涉及到数据库中的<strong>WAL</strong>技术，WAL的全称是Write-Ahead Logging，它的关键点就是先写日志，再写磁盘。为什么需要先写入redo log，而不是直接写入磁盘？写入磁盘只写入一次，而写redo log再写磁盘需要写入两次，这个就需要了解磁盘的写入过程。</p>
 <p>在磁盘中，如果直接写入话，需要随机io进行读写，而磁盘中磁头相对于cpu的速度又太慢了，而每次事物进行commit都需要随机io。redo log是顺序写入，相对于随机写入过程则快了数倍。</p>
-<p>在redo log的写入过程中，又分为几个阶段：一个是数据写入redo log file阶段，另一个是redo log file写入磁盘变成真正数据形式的阶段。</p>
+<p>在redo log的写入过程中，又分为几个阶段：一个是数据写入redo log file阶段，另一个是redo log file对比进行脏数据刷盘的阶段。</p>
 <ol>
 <li>写入redo log file阶段</li>
 </ol>
@@ -418,12 +418,12 @@
 <p>当设置为0的时候，事务提交时不会将log buffer中日志写入到os buffer，而是每秒写入os buffer并调用fsync()写入到log file on disk中。也就是说设置为0时是(大约)每秒刷新写入到磁盘中的，当系统崩溃，会丢失1秒钟的数据。</p>
 <p>当设置为2的时候，每次提交都仅写入到os buffer，然后是每秒调用fsync()将os buffer中的日志写入到log file on disk。</p>
 <ol start="2">
-<li>当数据写入redo log files之后，文件又是怎么样写入磁盘中的呢？<br><img src="https://user-gold-cdn.xitu.io/2020/5/31/17269faf1769f513?w=1142&h=656&f=png&s=161652" alt=""></li>
+<li>当数据写入redo log files之后，log文件又是对比进行刷盘的呢？<br><img src="https://user-gold-cdn.xitu.io/2020/5/31/17269faf1769f513?w=1142&h=656&f=png&s=161652" alt=""></li>
 </ol>
 <p>在大多数时候，内存中的数据和磁盘中的数据是不一样的，当内存数据页跟磁盘数据页内容不一致的时候，我们称这个内存页为“脏页”。内存数据写入到磁盘后，内存和磁盘上的数据页的内容就一致了，称为“干净页”。</p>
-<p>checkpoint是记录文件当前操作的位置。也就是checkpoint之前的数据表示都已经从内存中刷入磁盘成为了干净页，推进的的过程会不断的对比，遇到干净页则跳过。随着checkpoint会向后不断的移动，数据不断的刷入磁盘文件。直到追上write pos这个位置，表示内存中全部为干净页。从checkpoint到write pos之间的日志表示还没有内存中还存在这么多没有对比的数据。</p>
+<p>checkpoint是记录文件当前操作的位置。也就是checkpoint之前的数据表示都已经从内存中刷入磁盘成为了干净页，推进的的过程会不断的对比，脏数据也不是每次等redo log files推进才进行刷盘，所以遇到干净页则跳过。随着checkpoint会向后不断的移动，数据不断的刷入磁盘文件。直到追上write pos这个位置，表示内存中全部为干净页。从checkpoint到write pos之间的日志表示还没有内存中还存在这么多没有对比的数据。</p>
 <p>write pos是数据操作记录加载进的位置，该位置表示数据操作记录源源不断的写入到了log files，但是还没有进行对比确定成为正真的干净页。当数据写入到ib-logfile-3之后，又会从ib-logfile-0重新写入。形成一个链式循环。从write pos到checkpoint的空间表示可存储空间。</p>
-<p>buffer pool里维护着一个脏页列表，假设现在redo log 的 checkpoint 记录的 LSN 为 10，现在内存中的一干净页有修改，修改后该页的LSN为12，大于 checkpoint 的LSN，则在写redo log的同时该页也会被标记为脏页记录到脏页列表中，现在内存不足，该页需要被淘汰掉，该页会被刷到磁盘，磁盘中该页的LSN为12，该页也从脏页列表中移除，现在redo log 需要往前推进checkpoint，到LSN为12的这条log时，发现内存中的脏页列表里没有该页，且磁盘上该页的LSN也已经为12，则该页已刷脏，已为干净页，跳过</p>
+<p>举例：buffer pool里维护着一个脏页列表，假设现在redo log 的 checkpoint 记录的 LSN 为 10，现在内存中的一干净页有修改，修改后该页的LSN为12，大于 checkpoint 的LSN，则在写redo log的同时该页也会被标记为脏页记录到脏页列表中，现在内存不足，该页需要被淘汰掉，该页会被刷到磁盘，磁盘中该页的LSN为12，该页也从脏页列表中移除，现在redo log 需要往前推进checkpoint，到LSN为12的这条log时，发现内存中的脏页列表里没有该页，且磁盘上该页的LSN也已经为12，则该页已刷脏，已为干净页，跳过</p>
 <p>那什么时候会进行上诉这个刷脏页的过程呢，大概下面四种场景中会进行这种操作：</p>
 <ol>
 <li>第一在上图中write pos快追上checkpoint的时候，表示redo log files文件已经满了，这个时候数据库必须停下来自己的事了，因为在进行日志的写入也不可能往后续添加了。</li>
