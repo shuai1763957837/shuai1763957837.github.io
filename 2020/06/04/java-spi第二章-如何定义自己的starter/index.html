@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="starter背景 在第一章中，已经简单的介绍了java spi以及spi的用法以及优缺点。那spring中是否有用到spi机制呢？我们如何自定义一个starter呢？ 我们先简单的定义一个springboot版 starter在springboot starter官方命名推荐中，有两种形式 官方命名 spring-boot-starter-模块名 eg：spring-boot-starter-w">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java spi第二章:如何定义自己的starter">
+<meta property="og:url" content="https://shuai1763957837.github.io/2020/06/04/java-spi%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E5%A6%82%E4%BD%95%E5%AE%9A%E4%B9%89%E8%87%AA%E5%B7%B1%E7%9A%84starter/index.html">
+<meta property="og:site_name" content="codfaker">
+<meta property="og:description" content="starter背景 在第一章中，已经简单的介绍了java spi以及spi的用法以及优缺点。那spring中是否有用到spi机制呢？我们如何自定义一个starter呢？ 我们先简单的定义一个springboot版 starter在springboot starter官方命名推荐中，有两种形式 官方命名 spring-boot-starter-模块名 eg：spring-boot-starter-w">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/7/1728d2246caf82f9?w=610&h=283&f=png&s=13796">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/7/1728db8a70bf729a?w=500&h=633&f=png&s=138080">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/7/1728dbe0e962df05?w=1014&h=708&f=png&s=208415">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/7/1728dc1dc9109b47?w=825&h=496&f=png&s=174097">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/7/1728e3dbcd4b6c76?w=1424&h=840&f=png&s=1147055">
+<meta property="article:published_time" content="2020-06-04T13:54:00.000Z">
+<meta property="article:modified_time" content="2020-06-07T10:25:02.660Z">
+<meta property="article:author" content="shuaizx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/6/7/1728d2246caf82f9?w=610&h=283&f=png&s=13796">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://shuai1763957837.github.io/2020/06/04/java-spi第二章-如何定义自己的starter/"/>
+
+
+
+
+
+  <title>java spi第二章:如何定义自己的starter | codfaker</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?b1184fa1044d00d51aa7f5413396d0ff";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">codfaker</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://shuai1763957837.github.io/2020/06/04/java-spi%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E5%A6%82%E4%BD%95%E5%AE%9A%E4%B9%89%E8%87%AA%E5%B7%B1%E7%9A%84starter/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="shuaizx">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/hdImg_9e0cc479c1d3cf63fee27a0bb57814ed1590983454483.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="codfaker">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">java spi第二章:如何定义自己的starter</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-04T21:54:00+08:00">
+                2020-06-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/06/04/java-spi%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E5%A6%82%E4%BD%95%E5%AE%9A%E4%B9%89%E8%87%AA%E5%B7%B1%E7%9A%84starter/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/04/java-spi%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E5%A6%82%E4%BD%95%E5%AE%9A%E4%B9%89%E8%87%AA%E5%B7%B1%E7%9A%84starter/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/06/04/java-spi%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E5%A6%82%E4%BD%95%E5%AE%9A%E4%B9%89%E8%87%AA%E5%B7%B1%E7%9A%84starter/" class="leancloud_visitors" data-flag-title="java spi第二章:如何定义自己的starter">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="starter背景"><a href="#starter背景" class="headerlink" title="starter背景"></a>starter背景</h2><hr>
+<p>在第一章中，已经简单的介绍了java spi以及spi的用法以及优缺点。那spring中是否有用到spi机制呢？我们如何自定义一个starter呢？</p>
+<p>我们先简单的定义一个springboot版 starter<br>在springboot starter官方命名推荐中，有两种形式</p>
+<p><strong>官方命名</strong></p>
+<p>spring-boot-starter-模块名</p>
+<p>eg：spring-boot-starter-web、spring-boot-starter-jdbc、spring-boot-starter-thymeleaf</p>
+<p><strong>自定义命名</strong></p>
+<p>模块名xxx-spring-boot-starter</p>
+<p>eg：mybatis-spring-boot-start</p>
+<p>在定义starter的时候，也有相应的规则</p>
+<p>启动器模块是一个空 JAR 文件，仅提供辅助性依赖管理，这些依赖可能用于自动 装配或者其他类库</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/7/1728d2246caf82f9?w=610&h=283&f=png&s=13796" alt=""></p>
+<ul>
+<li><p>启动器只用来做依赖导入</p>
+</li>
+<li><p>专门来写一个自动配置模块；</p>
+</li>
+<li><p>启动器依赖自动配置模块，项目中引入相应的starter就会引入启动器的所有传递依赖</p>
+</li>
+</ul>
+<h2 id="starter示例"><a href="#starter示例" class="headerlink" title="starter示例"></a>starter示例</h2><hr>
+<p>我们按照这个规范定义一个demo</p>
+<p>1.先定义一个starter项目</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">demo-spring-boot-starter</span><br></pre></td></tr></table></figure>
+
+<p>再在starter下定义一个autoconfigure模块</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hello-starter-autoconfigure</span><br></pre></td></tr></table></figure>
+<p>starter pom文件如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;project xmlns&#x3D;&quot;http:&#x2F;&#x2F;maven.apache.org&#x2F;POM&#x2F;4.0.0&quot; xmlns:xsi&#x3D;&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2001&#x2F;XMLSchema-instance&quot;</span><br><span class="line">         xsi:schemaLocation&#x3D;&quot;http:&#x2F;&#x2F;maven.apache.org&#x2F;POM&#x2F;4.0.0 https:&#x2F;&#x2F;maven.apache.org&#x2F;xsd&#x2F;maven-4.0.0.xsd&quot;&gt;</span><br><span class="line">    &lt;modelVersion&gt;4.0.0&lt;&#x2F;modelVersion&gt;</span><br><span class="line">    &lt;parent&gt;</span><br><span class="line">        &lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;</span><br><span class="line">        &lt;artifactId&gt;spring-boot-starter-parent&lt;&#x2F;artifactId&gt;</span><br><span class="line">        &lt;version&gt;2.3.0.RELEASE&lt;&#x2F;version&gt;</span><br><span class="line">        &lt;relativePath&#x2F;&gt; &lt;!-- lookup parent from repository --&gt;</span><br><span class="line">    &lt;&#x2F;parent&gt;</span><br><span class="line">    &lt;groupId&gt;com.example&lt;&#x2F;groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;demo-spring-boot-starter&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;version&gt;0.0.1-SNAPSHOT&lt;&#x2F;version&gt;</span><br><span class="line">    &lt;name&gt;demo-spring-boot-starter&lt;&#x2F;name&gt;</span><br><span class="line">    &lt;description&gt;Demo project for Spring Boot&lt;&#x2F;description&gt;</span><br><span class="line"></span><br><span class="line">    &lt;properties&gt;</span><br><span class="line">        &lt;java.version&gt;1.8&lt;&#x2F;java.version&gt;</span><br><span class="line">    &lt;&#x2F;properties&gt;</span><br><span class="line"></span><br><span class="line">    &lt;dependencies&gt;</span><br><span class="line">        &lt;dependency&gt;</span><br><span class="line">            &lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;</span><br><span class="line">            &lt;artifactId&gt;spring-boot-starter&lt;&#x2F;artifactId&gt;</span><br><span class="line">        &lt;&#x2F;dependency&gt;</span><br><span class="line">        &lt;dependency&gt;</span><br><span class="line">            &lt;groupId&gt;com.example&lt;&#x2F;groupId&gt;</span><br><span class="line">            &lt;artifactId&gt;hello-starter-autoconfigure&lt;&#x2F;artifactId&gt;</span><br><span class="line">            &lt;version&gt;0.0.1-SNAPSHOT&lt;&#x2F;version&gt;</span><br><span class="line">        &lt;&#x2F;dependency&gt;</span><br><span class="line">    &lt;&#x2F;dependencies&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&lt;&#x2F;project&gt;</span><br></pre></td></tr></table></figure>
+<p>hello-starter-autoconfigure pom文件如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;project xmlns&#x3D;&quot;http:&#x2F;&#x2F;maven.apache.org&#x2F;POM&#x2F;4.0.0&quot; xmlns:xsi&#x3D;&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2001&#x2F;XMLSchema-instance&quot;</span><br><span class="line">         xsi:schemaLocation&#x3D;&quot;http:&#x2F;&#x2F;maven.apache.org&#x2F;POM&#x2F;4.0.0 https:&#x2F;&#x2F;maven.apache.org&#x2F;xsd&#x2F;maven-4.0.0.xsd&quot;&gt;</span><br><span class="line">    &lt;modelVersion&gt;4.0.0&lt;&#x2F;modelVersion&gt;</span><br><span class="line">    &lt;parent&gt;</span><br><span class="line">        &lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;</span><br><span class="line">        &lt;artifactId&gt;spring-boot-starter-parent&lt;&#x2F;artifactId&gt;</span><br><span class="line">        &lt;version&gt;2.3.0.RELEASE&lt;&#x2F;version&gt;</span><br><span class="line">        &lt;relativePath&#x2F;&gt; &lt;!-- lookup parent from repository --&gt;</span><br><span class="line">    &lt;&#x2F;parent&gt;</span><br><span class="line">    &lt;groupId&gt;com.example&lt;&#x2F;groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;hello-starter-autoconfigure&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;version&gt;0.0.1-SNAPSHOT&lt;&#x2F;version&gt;</span><br><span class="line">    &lt;name&gt;hello-starter-autoconfigure&lt;&#x2F;name&gt;</span><br><span class="line">    &lt;description&gt;Demo project for Spring Boot&lt;&#x2F;description&gt;</span><br><span class="line"></span><br><span class="line">    &lt;properties&gt;</span><br><span class="line">        &lt;java.version&gt;1.8&lt;&#x2F;java.version&gt;</span><br><span class="line">    &lt;&#x2F;properties&gt;</span><br><span class="line"></span><br><span class="line">    &lt;dependencies&gt;</span><br><span class="line">        &lt;dependency&gt;</span><br><span class="line">            &lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;</span><br><span class="line">            &lt;artifactId&gt;spring-boot-starter&lt;&#x2F;artifactId&gt;</span><br><span class="line">        &lt;&#x2F;dependency&gt;</span><br><span class="line">    &lt;&#x2F;dependencies&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&lt;&#x2F;project&gt;</span><br></pre></td></tr></table></figure>
+
+<p>只需要引入最基础的spring-boot-starter即可，<strong>注意需要在pom文件中去掉</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;build&gt;</span><br><span class="line">    &lt;plugins&gt;</span><br><span class="line">        &lt;plugin&gt;</span><br><span class="line">            &lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;</span><br><span class="line">            &lt;artifactId&gt;spring-boot-maven-plugin&lt;&#x2F;artifactId&gt;</span><br><span class="line">        &lt;&#x2F;plugin&gt;</span><br><span class="line">    &lt;&#x2F;plugins&gt;</span><br><span class="line">&lt;&#x2F;build&gt;</span><br></pre></td></tr></table></figure>
+<p>否则没有main方法主类无法打包</p>
+<ol start="2">
+<li>在hello-starter-autoconfigure模块下建立所需要的文件，在这里最简单化</li>
+</ol>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/7/1728db8a70bf729a?w=500&h=633&f=png&s=138080" alt=""></p>
+<p>包含HelloService和实现类，HelloAutoConfiguration配置类，具体如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public interface HelloService &#123;</span><br><span class="line">    String sayHello();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public class HelloServiceImpl implements HelloService &#123;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public String sayHello() &#123;</span><br><span class="line">        return &quot;shaizx&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">@Configuration</span><br><span class="line">@ConditionalOnWebApplication</span><br><span class="line">public class HelloAutoConfiguration &#123;</span><br><span class="line">    @Bean</span><br><span class="line">    public HelloService helloService()&#123;</span><br><span class="line">        return new HelloServiceImpl();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>最重要的一个步骤，在resources下建立META-INF文件夹，然后建立spring.factories文件，在spring.factories文件中对需要扫描的配置类进行配置，在这里是</strong></p>
+<p>##Auto Configure<br>org.springframework.boot.autoconfigure.EnableAutoConfiguration=<br>com.example.hellostarterautoconfigure.autoconfigure.HelloAutoConfiguration</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/7/1728dbe0e962df05?w=1014&h=708&f=png&s=208415" alt=""></p>
+<p>然后对hello-starter-autoconfigure打包，再对demo-spring-boot-starter进行打包，因为demo-spring-boot-starter包含hello-starter-autoconfigure，所以顺序不能反。</p>
+<p>这样一个可用的简单版的starter就搭建好了，我们在其他项目中导入测试一下</p>
+<p>我们导入starter的坐标</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;com.example&lt;&#x2F;groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;demo-spring-boot-starter&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;version&gt;0.0.1-SNAPSHOT&lt;&#x2F;version&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<p>建立一个HelloController测试类</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@RestController</span><br><span class="line">public class HelloController &#123;</span><br><span class="line">    @Autowired</span><br><span class="line">    private HelloService helloService;</span><br><span class="line">    @RequestMapping(&quot;&#x2F;sayHello&quot;)</span><br><span class="line">    public String sayHello()&#123;</span><br><span class="line">      return helloService.sayHello();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>开启测试</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/7/1728dc1dc9109b47?w=825&h=496&f=png&s=174097" alt=""></p>
+<p>返回shuaizx，starter测试完成</p>
+<h2 id="starter原理"><a href="#starter原理" class="headerlink" title="starter原理"></a><strong>starter原理</strong></h2><hr>
+<p>想要知道starter是怎么运行的，首先要知道springboot是怎么运行的，starter中的配置加载只是springboot加载中的一个过程。</p>
+<p>我们直接找到main方法的@SpringBootApplication注解，在观察@EnableAutoConfiguration注解，这个注解的意思就是启动自动配置的能力意思，我们刚才在starter spring.factories文件也配置了这个注解的key，value形式，那自动配置又是怎么做到的呢？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">@Target(ElementType.TYPE)</span><br><span class="line">@Retention(RetentionPolicy.RUNTIME)</span><br><span class="line">@Documented</span><br><span class="line">@Inherited</span><br><span class="line">@AutoConfigurationPackage</span><br><span class="line">@Import(AutoConfigurationImportSelector.class)</span><br><span class="line">public @interface EnableAutoConfiguration &#123;</span><br><span class="line"></span><br><span class="line">	String ENABLED_OVERRIDE_PROPERTY &#x3D; &quot;spring.boot.enableautoconfiguration&quot;;</span><br><span class="line"></span><br><span class="line">	&#x2F;**</span><br><span class="line">	 * Exclude specific auto-configuration classes such that they will never be applied.</span><br><span class="line">	 * @return the classes to exclude</span><br><span class="line">	 *&#x2F;</span><br><span class="line">	Class&lt;?&gt;[] exclude() default &#123;&#125;;</span><br><span class="line"></span><br><span class="line">	&#x2F;**</span><br><span class="line">	 * Exclude specific auto-configuration class names such that they will never be</span><br><span class="line">	 * applied.</span><br><span class="line">	 * @return the class names to exclude</span><br><span class="line">	 * @since 1.3.0</span><br><span class="line">	 *&#x2F;</span><br><span class="line">	String[] excludeName() default &#123;&#125;;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看到在EnableAutoConfiguration上有<br><strong>@Import(AutoConfigurationImportSelector.class)</strong><br>的自动引入字样</p>
+<p>@Import 可以配置三种不同的class</p>
+<ul>
+<li>普通bean或者有@Configuration 的bean</li>
+<li>实现ImportSelector 接口进行动态注入</li>
+<li>实现ImportBeanDefinitionRegistrar 接口进行动态注入<br>AutoConfigurationImportSelector</li>
+</ul>
+<p>通过名字可以猜到它是基于第二种情况实现bean 的加载功能</p>
+<p>关键就在这里</p>
+<p>AutoConfigurationImportSelector这个类实现了DeferredImportSelector接口，DeferredImportSelector接口继承了ImportSelector接口</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public interface DeferredImportSelector extends ImportSelector</span><br></pre></td></tr></table></figure>
+<p>ImportSelector接口是Spring导入外部配置的核心接口，在SpringBoot的自动化配置和@EnableXXX(功能性注解)中起到了决定性的作用。当在@Conﬁguration标注的Class上使用@Import引入了一个 ImportSelector实现类后，会把实现类中返回的Class名称都定义为bean。</p>
+<p>DeferredImportSelector接口继承自ImportSelector，它和ImportSelector的区别在于装载bean的时机上，DeferredImportSelector需要等所有的@Conﬁguration都执行完毕后才会进行装载。</p>
+<p>AutoConfigurationImportSelector类中的selectImports方法实现如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public String[] selectImports(AnnotationMetadata annotationMetadata) &#123;</span><br><span class="line">	if (!isEnabled(annotationMetadata)) &#123;</span><br><span class="line">		return NO_IMPORTS;</span><br><span class="line">	&#125;</span><br><span class="line">	AutoConfigurationMetadata autoConfigurationMetadata &#x3D; AutoConfigurationMetadataLoader</span><br><span class="line">			.loadMetadata(this.beanClassLoader);</span><br><span class="line">	AutoConfigurationEntry autoConfigurationEntry &#x3D; getAutoConfigurationEntry(autoConfigurationMetadata,</span><br><span class="line">			annotationMetadata);</span><br><span class="line">	return StringUtils.toStringArray(autoConfigurationEntry.getConfigurations());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>String[]返回的字符串会全部被注入到bean容器中，我们看getAutoConfigurationEntry这里面的实现。在这个实现中对获取到了的类进行了去重加过滤等，最后过滤出来的configurations截图如下，有我们在前面设置的com.example.hellostarterautoconfigure.autoconfigure.HelloAutoConfiguration，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">protected AutoConfigurationEntry getAutoConfigurationEntry(AutoConfigurationMetadata autoConfigurationMetadata,</span><br><span class="line">		AnnotationMetadata annotationMetadata) &#123;</span><br><span class="line">	if (!isEnabled(annotationMetadata)) &#123;</span><br><span class="line">		return EMPTY_ENTRY;</span><br><span class="line">	&#125;</span><br><span class="line">	AnnotationAttributes attributes &#x3D; getAttributes(annotationMetadata);</span><br><span class="line">	List&lt;String&gt; configurations &#x3D; getCandidateConfigurations(annotationMetadata, attributes);</span><br><span class="line">	configurations &#x3D; removeDuplicates(configurations);</span><br><span class="line">	Set&lt;String&gt; exclusions &#x3D; getExclusions(annotationMetadata, attributes);</span><br><span class="line">	checkExcludedClasses(configurations, exclusions);</span><br><span class="line">	configurations.removeAll(exclusions);</span><br><span class="line">	configurations &#x3D; filter(configurations, autoConfigurationMetadata);</span><br><span class="line">	fireAutoConfigurationImportEvents(configurations, exclusions);</span><br><span class="line">	return new AutoConfigurationEntry(configurations, exclusions);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/7/1728e3dbcd4b6c76?w=1424&h=840&f=png&s=1147055" alt=""></p>
+<p>configurations类路径字符串又是从getCandidateConfigurations方法中获取的，再继续进入getCandidateConfigurations方法查看里面的关键实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">protected List&lt;String&gt; getCandidateConfigurations(AnnotationMetadata metadata, AnnotationAttributes attributes) &#123;</span><br><span class="line">	List&lt;String&gt; configurations &#x3D; SpringFactoriesLoader.loadFactoryNames(getSpringFactoriesLoaderFactoryClass(),</span><br><span class="line">			getBeanClassLoader());</span><br><span class="line">	Assert.notEmpty(configurations, &quot;No auto configuration classes found in META-INF&#x2F;spring.factories. If you &quot;</span><br><span class="line">			+ &quot;are using a custom packaging, make sure that file is correct.&quot;);</span><br><span class="line">	return configurations;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>最终调用了SpringFactoriesLoader.loadFactoryNames这个方法，getSpringFactoriesLoaderFactoryClass()方法返回的是EnableAutoConfiguration.class，，待会会通过这个类对获取到的map进行过滤</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">protected Class&lt;?&gt; getSpringFactoriesLoaderFactoryClass() &#123;</span><br><span class="line">	return EnableAutoConfiguration.class，;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public static List&lt;String&gt; loadFactoryNames(Class&lt;?&gt; factoryType, @Nullable ClassLoader classLoader) &#123;</span><br><span class="line">	String factoryTypeName &#x3D; factoryType.getName();</span><br><span class="line">	return loadSpringFactories(classLoader).getOrDefault(factoryTypeName, Collections.emptyList());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>loadFactoryNames方法调用了loadSpringFactories方法，然后获取到的map在进行过滤，通过刚才传入的EnableAutoConfiguration.class，没有则返回空数组</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">private static Map&lt;String, List&lt;String&gt;&gt; loadSpringFactories(@Nullable ClassLoader classLoader) &#123;</span><br><span class="line">		MultiValueMap&lt;String, String&gt; result &#x3D; cache.get(classLoader);</span><br><span class="line">		if (result !&#x3D; null) &#123;</span><br><span class="line">			return result;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		try &#123;</span><br><span class="line">			Enumeration&lt;URL&gt; urls &#x3D; (classLoader !&#x3D; null ?</span><br><span class="line">					classLoader.getResources(FACTORIES_RESOURCE_LOCATION) :</span><br><span class="line">					ClassLoader.getSystemResources(FACTORIES_RESOURCE_LOCATION));</span><br><span class="line">			result &#x3D; new LinkedMultiValueMap&lt;&gt;();</span><br><span class="line">			while (urls.hasMoreElements()) &#123;</span><br><span class="line">				URL url &#x3D; urls.nextElement();</span><br><span class="line">				UrlResource resource &#x3D; new UrlResource(url);</span><br><span class="line">				Properties properties &#x3D; PropertiesLoaderUtils.loadProperties(resource);</span><br><span class="line">				for (Map.Entry&lt;?, ?&gt; entry : properties.entrySet()) &#123;</span><br><span class="line">					String factoryTypeName &#x3D; ((String) entry.getKey()).trim();</span><br><span class="line">					for (String factoryImplementationName : StringUtils.commaDelimitedListToStringArray((String) entry.getValue())) &#123;</span><br><span class="line">						result.add(factoryTypeName, factoryImplementationName.trim());</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			cache.put(classLoader, result);</span><br><span class="line">			return result;</span><br><span class="line">		&#125;</span><br><span class="line">		catch (IOException ex) &#123;</span><br><span class="line">			throw new IllegalArgumentException(&quot;Unable to load factories from location [&quot; +</span><br><span class="line">					FACTORIES_RESOURCE_LOCATION + &quot;]&quot;, ex);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>SpringFactoriesLoader这个类中的属性FACTORIES_RESOURCE_LOCATION 就是我们熟悉的META-INF/spring.factories路径</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * The location to look for factories.</span><br><span class="line"> * &lt;p&gt;Can be present in multiple JAR files.</span><br><span class="line"> *&#x2F;</span><br><span class="line">public static final String FACTORIES_RESOURCE_LOCATION &#x3D; &quot;META-INF&#x2F;spring.factories&quot;;</span><br></pre></td></tr></table></figure>
+
+<p>loadSpringFactories方法在springboot初始化中就调用过，在初始化时会对这个地方会进行缓存，后续调用这个方法直接通过cache获取到map，然后过滤。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Enumeration&lt;URL&gt; urls &#x3D; (classLoader !&#x3D; null ?</span><br><span class="line">		classLoader.getResources(FACTORIES_RESOURCE_LOCATION) :</span><br><span class="line">		ClassLoader.getSystemResources(FACTORIES_RESOURCE_LOCATION));</span><br></pre></td></tr></table></figure>
+<p>classLoader.getResources(FACTORIES_RESOURCE_LOCATION) 就是对META-INF/spring.factories下的资源进行获取。后面处理的时候会返回类的全路径然后过滤。最终返回我们设置的starter配置的类路径。</p>
+<p>总结一下就是</p>
+<ol>
+<li>AutoConfigurationImportSelector实现了ImportSelector接口，实现selectImports方法，返回的字符串会定义为bean</li>
+<li>getCandidateConfigurations方法调用了<strong>SpringFactoriesLoader</strong>.loadFactoryNames方法，传入了EnableAutoConfiguration.class进行过滤，返回所有被EnableAutoConfiguration修饰的类路径</li>
+<li>对getCandidateConfigurations返回的路径再次过滤，得到我们想要的类路径，进行后续操作</li>
+</ol>
+<p>这就是自动装配的原理，也是我们定义一个starter必备的过程。</p>
+<p>参考文章：<br><a href="https://www.lagou.com/lgeduarticle/82172.html" target="_blank" rel="noopener">https://www.lagou.com/lgeduarticle/82172.html</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/04/java-spi%E7%AC%AC%E4%B8%80%E7%AB%A0-JDBC%E6%8E%A5%E5%8F%A3%E6%80%8E%E4%B9%88%E5%8A%A0%E8%BD%BD%E8%87%AA%E5%B7%B1%E7%9A%84%E5%AE%9E%E7%8E%B0%E7%B1%BB/" rel="next" title="java spi第一章:JDBC接口怎么加载自己的实现类">
+                <i class="fa fa-chevron-left"></i> java spi第一章:JDBC接口怎么加载自己的实现类
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/06/04/java-spi%E7%AC%AC%E4%B8%89%E7%AB%A0-%E5%A6%82%E4%BD%95%E8%87%AA%E5%AE%9A%E4%B9%89dubbo%E7%9A%84%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E7%8E%B0/" rel="prev" title="java spi第三章:如何自定义dubbo的负载均衡实现">
+                java spi第三章:如何自定义dubbo的负载均衡实现 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/hdImg_9e0cc479c1d3cf63fee27a0bb57814ed1590983454483.jpg"
+                alt="shuaizx" />
+            
+              <p class="site-author-name" itemprop="name">shuaizx</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#starter背景"><span class="nav-number">1.</span> <span class="nav-text">starter背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#starter示例"><span class="nav-number">2.</span> <span class="nav-text">starter示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#starter原理"><span class="nav-number">3.</span> <span class="nav-text">starter原理</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shuaizx</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: '1RtaFeL1X2iHoDB2lwtYnEeI-gzGzoHsz',
+        appKey: 'bb4x5BHK2OkQrnvbt3VuWUgm',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("1RtaFeL1X2iHoDB2lwtYnEeI-gzGzoHsz", "bb4x5BHK2OkQrnvbt3VuWUgm");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

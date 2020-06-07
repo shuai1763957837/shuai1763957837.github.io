@@ -83,7 +83,7 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="对象一定在堆上分配吗？论逃逸分析、栈上分配、标量替换和锁消除">
 <meta property="og:url" content="https://shuai1763957837.github.io/2020/05/19/%E5%AF%B9%E8%B1%A1%E4%B8%80%E5%AE%9A%E5%9C%A8%E5%A0%86%E4%B8%8A%E5%88%86%E9%85%8D%E5%90%97%EF%BC%9F%E8%AE%BA%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90%E3%80%81%E6%A0%88%E4%B8%8A%E5%88%86%E9%85%8D%E3%80%81%E6%A0%87%E9%87%8F%E6%9B%BF%E6%8D%A2%E5%92%8C%E9%94%81%E6%B6%88%E9%99%A4/index.html">
-<meta property="og:site_name" content="codingfaker">
+<meta property="og:site_name" content="codfaker">
 <meta property="og:description" content="在传统对象分配当中，通常在堆上进行对象实例的分配，但是随着JIT编译器的发展和逃逸分析技术的成熟，在栈上分配内存也不那么绝对了。下面简单介绍逃逸分析、栈上分配、标量替换和锁消除  逃逸分析 hotSpot虚拟机可以利用相应算法，判断对象是否逃逸，从而实现对象是否在栈上分配还是堆分配的一项技术。 逃逸又分为几种情况： 1、全局逃逸（GlobalEscape）即一个对象的作用范围逃出了当前方法或者当前">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/25/1724a78da4fc920c?w=659&h=514&f=png&s=160900">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/25/1724a7a9164fce6d?w=820&h=790&f=png&s=264863">
@@ -130,7 +130,7 @@
 
 
 
-  <title>对象一定在堆上分配吗？论逃逸分析、栈上分配、标量替换和锁消除 | codingfaker</title>
+  <title>对象一定在堆上分配吗？论逃逸分析、栈上分配、标量替换和锁消除 | codfaker</title>
   
 
 
@@ -170,7 +170,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">codingfaker</span>
+        <span class="site-title">codfaker</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -276,7 +276,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="codingfaker">
+      <meta itemprop="name" content="codfaker">
     </span>
 
     
@@ -473,8 +473,8 @@ public static void main(String[] args) throws InterruptedException {
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2020/05/07/%E6%B5%85%E5%97%91ThreadLocal%E4%B9%8B%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/" rel="next" title="浅嗑ThreadLocal之内存泄漏">
-                <i class="fa fa-chevron-left"></i> 浅嗑ThreadLocal之内存泄漏
+              <a href="/2020/05/07/%E6%B5%85%E5%97%91ThreadLocal%E4%B9%8B%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/" rel="next" title="ThreadLocal真的会内存泄漏吗">
+                <i class="fa fa-chevron-left"></i> ThreadLocal真的会内存泄漏吗
               </a>
             
           </div>
@@ -503,6 +503,12 @@ public static void main(String[] args) throws InterruptedException {
 
 
     <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
       
     </div>
   </div>
@@ -560,7 +566,7 @@ public static void main(String[] args) throws InterruptedException {
               
                 <a href="/archives">
               
-                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-count">9</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -582,7 +588,7 @@ public static void main(String[] args) throws InterruptedException {
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
