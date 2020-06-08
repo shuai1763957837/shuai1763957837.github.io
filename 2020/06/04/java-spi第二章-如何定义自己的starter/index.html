@@ -83,18 +83,18 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="java spi第二章:如何定义自己的starter">
 <meta property="og:url" content="https://shuai1763957837.github.io/2020/06/04/java-spi%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E5%A6%82%E4%BD%95%E5%AE%9A%E4%B9%89%E8%87%AA%E5%B7%B1%E7%9A%84starter/index.html">
-<meta property="og:site_name" content="codfaker">
+<meta property="og:site_name" content="binaryfaker">
 <meta property="og:description" content="starter背景 在第一章中，已经简单的介绍了java spi以及spi的用法以及优缺点。那spring中是否有用到spi机制呢？我们如何自定义一个starter呢？ 我们先简单的定义一个springboot版 starter在springboot starter官方命名推荐中，有两种形式 官方命名 spring-boot-starter-模块名 eg：spring-boot-starter-w">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/7/1728d2246caf82f9?w=610&h=283&f=png&s=13796">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/7/1728db8a70bf729a?w=500&h=633&f=png&s=138080">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/7/1728dbe0e962df05?w=1014&h=708&f=png&s=208415">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/7/1728dc1dc9109b47?w=825&h=496&f=png&s=174097">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/7/1728e3dbcd4b6c76?w=1424&h=840&f=png&s=1147055">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/17294731ad3b10f4?w=610&h=283&f=jpeg&s=46449">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/1729471544b12c57?w=500&h=633&f=jpeg&s=96530">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/1729471c66255603?w=1014&h=708&f=jpeg&s=148263">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/17294722f5f5d604?w=825&h=496&f=jpeg&s=126041">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/17294729742ff2ed?w=1424&h=840&f=jpeg&s=842102">
 <meta property="article:published_time" content="2020-06-04T13:54:00.000Z">
-<meta property="article:modified_time" content="2020-06-07T10:25:02.660Z">
+<meta property="article:modified_time" content="2020-06-08T15:04:38.348Z">
 <meta property="article:author" content="shuaizx">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/6/7/1728d2246caf82f9?w=610&h=283&f=png&s=13796">
+<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/6/8/17294731ad3b10f4?w=610&h=283&f=jpeg&s=46449">
 
 
 
@@ -130,7 +130,7 @@
 
 
 
-  <title>java spi第二章:如何定义自己的starter | codfaker</title>
+  <title>java spi第二章:如何定义自己的starter | binaryfaker</title>
   
 
 
@@ -170,7 +170,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">codfaker</span>
+        <span class="site-title">binaryfaker</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -276,7 +276,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="codfaker">
+      <meta itemprop="name" content="binaryfaker">
     </span>
 
     
@@ -366,7 +366,7 @@
 <p>eg：mybatis-spring-boot-start</p>
 <p>在定义starter的时候，也有相应的规则</p>
 <p>启动器模块是一个空 JAR 文件，仅提供辅助性依赖管理，这些依赖可能用于自动 装配或者其他类库</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/6/7/1728d2246caf82f9?w=610&h=283&f=png&s=13796" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/17294731ad3b10f4?w=610&h=283&f=jpeg&s=46449" alt=""></p>
 <ul>
 <li><p>启动器只用来做依赖导入</p>
 </li>
@@ -393,7 +393,7 @@
 <ol start="2">
 <li>在hello-starter-autoconfigure模块下建立所需要的文件，在这里最简单化</li>
 </ol>
-<p><img src="https://user-gold-cdn.xitu.io/2020/6/7/1728db8a70bf729a?w=500&h=633&f=png&s=138080" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/1729471544b12c57?w=500&h=633&f=jpeg&s=96530" alt=""></p>
 <p>包含HelloService和实现类，HelloAutoConfiguration配置类，具体如下</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public interface HelloService &#123;</span><br><span class="line">    String sayHello();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -404,7 +404,7 @@
 
 <p><strong>最重要的一个步骤，在resources下建立META-INF文件夹，然后建立spring.factories文件，在spring.factories文件中对需要扫描的配置类进行配置，在这里是</strong></p>
 <p>##Auto Configure<br>org.springframework.boot.autoconfigure.EnableAutoConfiguration=<br>com.example.hellostarterautoconfigure.autoconfigure.HelloAutoConfiguration</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/6/7/1728dbe0e962df05?w=1014&h=708&f=png&s=208415" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/1729471c66255603?w=1014&h=708&f=jpeg&s=148263" alt=""></p>
 <p>然后对hello-starter-autoconfigure打包，再对demo-spring-boot-starter进行打包，因为demo-spring-boot-starter包含hello-starter-autoconfigure，所以顺序不能反。</p>
 <p>这样一个可用的简单版的starter就搭建好了，我们在其他项目中导入测试一下</p>
 <p>我们导入starter的坐标</p>
@@ -414,7 +414,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@RestController</span><br><span class="line">public class HelloController &#123;</span><br><span class="line">    @Autowired</span><br><span class="line">    private HelloService helloService;</span><br><span class="line">    @RequestMapping(&quot;&#x2F;sayHello&quot;)</span><br><span class="line">    public String sayHello()&#123;</span><br><span class="line">      return helloService.sayHello();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>开启测试</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/6/7/1728dc1dc9109b47?w=825&h=496&f=png&s=174097" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/17294722f5f5d604?w=825&h=496&f=jpeg&s=126041" alt=""></p>
 <p>返回shuaizx，starter测试完成</p>
 <h2 id="starter原理"><a href="#starter原理" class="headerlink" title="starter原理"></a><strong>starter原理</strong></h2><hr>
 <p>想要知道starter是怎么运行的，首先要知道springboot是怎么运行的，starter中的配置加载只是springboot加载中的一个过程。</p>
@@ -440,7 +440,7 @@
 <p>String[]返回的字符串会全部被注入到bean容器中，我们看getAutoConfigurationEntry这里面的实现。在这个实现中对获取到了的类进行了去重加过滤等，最后过滤出来的configurations截图如下，有我们在前面设置的com.example.hellostarterautoconfigure.autoconfigure.HelloAutoConfiguration，</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">protected AutoConfigurationEntry getAutoConfigurationEntry(AutoConfigurationMetadata autoConfigurationMetadata,</span><br><span class="line">		AnnotationMetadata annotationMetadata) &#123;</span><br><span class="line">	if (!isEnabled(annotationMetadata)) &#123;</span><br><span class="line">		return EMPTY_ENTRY;</span><br><span class="line">	&#125;</span><br><span class="line">	AnnotationAttributes attributes &#x3D; getAttributes(annotationMetadata);</span><br><span class="line">	List&lt;String&gt; configurations &#x3D; getCandidateConfigurations(annotationMetadata, attributes);</span><br><span class="line">	configurations &#x3D; removeDuplicates(configurations);</span><br><span class="line">	Set&lt;String&gt; exclusions &#x3D; getExclusions(annotationMetadata, attributes);</span><br><span class="line">	checkExcludedClasses(configurations, exclusions);</span><br><span class="line">	configurations.removeAll(exclusions);</span><br><span class="line">	configurations &#x3D; filter(configurations, autoConfigurationMetadata);</span><br><span class="line">	fireAutoConfigurationImportEvents(configurations, exclusions);</span><br><span class="line">	return new AutoConfigurationEntry(configurations, exclusions);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://user-gold-cdn.xitu.io/2020/6/7/1728e3dbcd4b6c76?w=1424&h=840&f=png&s=1147055" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/17294729742ff2ed?w=1424&h=840&f=jpeg&s=842102" alt=""></p>
 <p>configurations类路径字符串又是从getCandidateConfigurations方法中获取的，再继续进入getCandidateConfigurations方法查看里面的关键实现</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">protected List&lt;String&gt; getCandidateConfigurations(AnnotationMetadata metadata, AnnotationAttributes attributes) &#123;</span><br><span class="line">	List&lt;String&gt; configurations &#x3D; SpringFactoriesLoader.loadFactoryNames(getSpringFactoriesLoaderFactoryClass(),</span><br><span class="line">			getBeanClassLoader());</span><br><span class="line">	Assert.notEmpty(configurations, &quot;No auto configuration classes found in META-INF&#x2F;spring.factories. If you &quot;</span><br><span class="line">			+ &quot;are using a custom packaging, make sure that file is correct.&quot;);</span><br><span class="line">	return configurations;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
