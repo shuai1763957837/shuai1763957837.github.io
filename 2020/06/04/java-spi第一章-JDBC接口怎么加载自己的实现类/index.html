@@ -85,14 +85,15 @@
 <meta property="og:url" content="https://shuai1763957837.github.io/2020/06/04/java-spi%E7%AC%AC%E4%B8%80%E7%AB%A0-JDBC%E6%8E%A5%E5%8F%A3%E6%80%8E%E4%B9%88%E5%8A%A0%E8%BD%BD%E8%87%AA%E5%B7%B1%E7%9A%84%E5%AE%9E%E7%8E%B0%E7%B1%BB/index.html">
 <meta property="og:site_name" content="binaryfaker">
 <meta property="og:description" content="什么是spi，全称为 Service Provider Interface，是java的一种服务发现机制。 当服务的提供者提供了相应的实现之后，我们只需要在jar包的META-INF&#x2F;services&#x2F;目录里同时创建一个以服务接口命名的文件。文件内就是实现类的全路径，这样就ServiceLoader加载时就可以通过反射加载具体的实现，完成模块的注入。 下面举一个列子： 我们先定义一个接口： 123">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/5/172820a05274404c?w=784&h=481&f=jpeg&s=125169">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/5/17282333a609ab26?w=1438&h=345&f=png&s=196292">
+<meta property="og:image" content="https://tvax3.sinaimg.cn/large/006EuVaagy1gflaap1lllj30ls0dd77e.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006EuVaagy1gflaabfjqrj30v80avq78.jpg">
+<meta property="og:image" content="https://tvax2.sinaimg.cn/large/006EuVaagy1gflaba9j23j313y09ln27.jpg">
 <meta property="article:published_time" content="2020-06-04T13:53:23.000Z">
-<meta property="article:modified_time" content="2020-06-05T06:11:07.981Z">
+<meta property="article:modified_time" content="2020-06-08T15:13:49.715Z">
 <meta property="article:author" content="shuaizx">
 <meta property="article:tag" content="java基础">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/6/5/172820a05274404c?w=784&h=481&f=jpeg&s=125169">
+<meta name="twitter:image" content="https://tvax3.sinaimg.cn/large/006EuVaagy1gflaap1lllj30ls0dd77e.jpg">
 
 
 
@@ -368,13 +369,13 @@
 <p>在文件中输入实现类的全限定名</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">com.example.alipay.active.impl.ActiveImpl</span><br><span class="line">com.example.alipay.active.impl.ActiveImpl2</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://user-gold-cdn.xitu.io/2020/6/5/172820a05274404c?w=784&h=481&f=jpeg&s=125169" alt=""></p>
+<p><img src="https://tvax3.sinaimg.cn/large/006EuVaagy1gflaap1lllj30ls0dd77e.jpg" alt=""></p>
 <p>然后在测试类中运行</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">    Class&lt;Active&gt; activeClass &#x3D; Active.class;</span><br><span class="line"></span><br><span class="line">    ServiceLoader&lt;Active&gt; serviceLoader&#x3D;ServiceLoader.load(Active.class);</span><br><span class="line">    Iterator&lt;Active&gt; iterator &#x3D; serviceLoader.iterator();</span><br><span class="line">    while (iterator.hasNext())&#123;</span><br><span class="line">        Active next &#x3D; iterator.next();</span><br><span class="line">        System.out.println(next.getName());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
 
-<p>![](/Users/shuaizhongxian/Library/Application Support/typora-user-images/image-20200604230633229.png)</p>
+<p><img src="https://tva1.sinaimg.cn/large/006EuVaagy1gflaabfjqrj30v80avq78.jpg" alt=""></p>
 <p>这样就轻松的实现了一个java中的spi，根据上诉信息，总结出spi的几个要点：</p>
 <ul>
 <li>定义接口和接口实现类</li>
@@ -396,7 +397,7 @@
 <p>在测试方法中进行第一行获取迭代值的时候，其实是没有值的，在java spi中实行的是懒加载策略，就是在你需要的时候才进行加载</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Iterator&lt;Active&gt; iterator &#x3D; serviceLoader.iterator();</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://user-gold-cdn.xitu.io/2020/6/5/17282333a609ab26?w=1438&h=345&f=png&s=196292" alt=""></p>
+<p><img src="https://tvax2.sinaimg.cn/large/006EuVaagy1gflaba9j23j313y09ln27.jpg" alt=""></p>
 <p>当我们调用iterator.hasNext和iterator.next方法的时候，实际上调用的都是LazyIterator的相应方法。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public boolean hasNext() &#123;</span><br><span class="line">    if (acc &#x3D;&#x3D; null) &#123;</span><br><span class="line">        return hasNextService();</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        PrivilegedAction&lt;Boolean&gt; action &#x3D; new PrivilegedAction&lt;Boolean&gt;() &#123;</span><br><span class="line">            public Boolean run() &#123; return hasNextService(); &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        return AccessController.doPrivileged(action, acc);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -407,9 +408,9 @@
 
 <ul>
 <li><pre><code>String fullName = PREFIX + service.getName();进行接口的全限定路径查找
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">![](&#x2F;Users&#x2F;shuaizhongxian&#x2F;Library&#x2F;Application Support&#x2F;typora-user-images&#x2F;image-20200604234103581.png)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">![](https:&#x2F;&#x2F;tvax3.sinaimg.cn&#x2F;large&#x2F;006EuVaagy1gflac7ocjbj30ox0f5jzj.jpg)</span><br></pre></td></tr></table></figure>
 pending = parse(service, configs.nextElement());找到实现类的全路径
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">![](https:&#x2F;&#x2F;user-gold-cdn.xitu.io&#x2F;2020&#x2F;6&#x2F;5&#x2F;172820d2216507d3?w&#x3D;849&amp;h&#x3D;340&amp;f&#x3D;png&amp;s&#x3D;151973)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">在进行next迭代的时候，其实最后也是进行hasNextService进行判定，然后取出nextName，此值为在hasNextService时存储的类的全限定名，hasNextService如上面代码所示</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">![](https:&#x2F;&#x2F;tvax3.sinaimg.cn&#x2F;large&#x2F;006EuVaagy1gflachtgiij30nl09gdjo.jpg)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">在进行next迭代的时候，其实最后也是进行hasNextService进行判定，然后取出nextName，此值为在hasNextService时存储的类的全限定名，hasNextService如上面代码所示</span><br></pre></td></tr></table></figure>
       private S nextService() {
           if (!hasNextService())
               throw new NoSuchElementException();
@@ -441,12 +442,12 @@ pending = parse(service, configs.nextElement());找到实现类的全路径
 c = Class.forName(cn, false, loader);
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">然后把类全限定名和实例放进Map中，从而迭代器中也存储了实例</span><br></pre></td></tr></table></figure>
 providers.put(cn, p);
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">全部实例迭代完之后，你会发现，迭代器中已经存储了实现类的实例</span><br><span class="line"></span><br><span class="line">![](https:&#x2F;&#x2F;user-gold-cdn.xitu.io&#x2F;2020&#x2F;6&#x2F;5&#x2F;1728231d16e81001?w&#x3D;1068&amp;h&#x3D;382&amp;f&#x3D;png&amp;s&#x3D;234131)</span><br><span class="line"></span><br><span class="line">***</span><br><span class="line">探究一下JDBC是怎么加载自己的实现类的</span><br><span class="line"></span><br><span class="line">在rt.jar类库中找到DriverManager类，类中的静态代码块</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">全部实例迭代完之后，你会发现，迭代器中已经存储了实现类的实例</span><br><span class="line"></span><br><span class="line">![](https:&#x2F;&#x2F;tvax1.sinaimg.cn&#x2F;large&#x2F;006EuVaagy1gflad4d1g9j30to0amn38.jpg)</span><br><span class="line"></span><br><span class="line">***</span><br><span class="line">探究一下JDBC是怎么加载自己的实现类的</span><br><span class="line"></span><br><span class="line">在rt.jar类库中找到DriverManager类，类中的静态代码块</span><br></pre></td></tr></table></figure>
   static {
       loadInitialDrivers();
       println(&quot;JDBC DriverManager initialized&quot;);
   }
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">![](https:&#x2F;&#x2F;user-gold-cdn.xitu.io&#x2F;2020&#x2F;6&#x2F;5&#x2F;1728245d1829e6f4?w&#x3D;807&amp;h&#x3D;437&amp;f&#x3D;png&amp;s&#x3D;187242)</span><br><span class="line">在上面标红的地方加载Drive.class接口的实现类，那我们的实现类在哪里定义的呢，java并没有规定死我们的JDBC驱动实现</span><br><span class="line"></span><br><span class="line">我们找到mysql驱动包</span><br><span class="line"></span><br><span class="line">![](https:&#x2F;&#x2F;user-gold-cdn.xitu.io&#x2F;2020&#x2F;6&#x2F;5&#x2F;1728247d8172d1c9?w&#x3D;938&amp;h&#x3D;412&amp;f&#x3D;png&amp;s&#x3D;155478)</span><br><span class="line">在mysql驱动中，在META-INF&#x2F;services中找到了接口的实现，NonRegisteringDriver实现了Drive接口的所有方法，Driver实现类中把自己的实例注册到了DriverManager中</span><br><span class="line">**DriverManager.registerDriver(new Driver());**</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">![](https:&#x2F;&#x2F;tvax3.sinaimg.cn&#x2F;large&#x2F;006EuVaagy1gfladgpc93j30mf0c5tdi.jpg)</span><br><span class="line">在上面标红的地方加载Drive.class接口的实现类，那我们的实现类在哪里定义的呢，java并没有规定死我们的JDBC驱动实现</span><br><span class="line"></span><br><span class="line">我们找到mysql驱动包</span><br><span class="line"></span><br><span class="line">![](https:&#x2F;&#x2F;tvax2.sinaimg.cn&#x2F;large&#x2F;006EuVaagy1gfladr21mqj30q20bgtcn.jpg)</span><br><span class="line">在mysql驱动中，在META-INF&#x2F;services中找到了接口的实现，NonRegisteringDriver实现了Drive接口的所有方法，Driver实现类中把自己的实例注册到了DriverManager中</span><br><span class="line">**DriverManager.registerDriver(new Driver());**</span><br></pre></td></tr></table></figure>
 public class Driver extends NonRegisteringDriver implements java.sql.Driver {
   public Driver() throws SQLException {
   }
