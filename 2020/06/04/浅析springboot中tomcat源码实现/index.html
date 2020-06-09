@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="tomcat," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="tomcat想必大家都非常的了解，在这里就不必介绍，在现在应用的springboot框架，tomcat就被内嵌其中。tomcat是怎么运行起来的？你知道怎么拓展tomcat吗？ tomcat启动流程 springboot加载流程首先我们看一下springboot中tomcat的启动流程 1.找到AbstractApplicationContext方法中refresh方法，这个也是spring的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅析springboot中tomcat源码实现">
+<meta property="og:url" content="https://shuai1763957837.github.io/2020/06/04/%E6%B5%85%E6%9E%90springboot%E4%B8%ADtomcat%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0/index.html">
+<meta property="og:site_name" content="binaryfaker">
+<meta property="og:description" content="tomcat想必大家都非常的了解，在这里就不必介绍，在现在应用的springboot框架，tomcat就被内嵌其中。tomcat是怎么运行起来的？你知道怎么拓展tomcat吗？ tomcat启动流程 springboot加载流程首先我们看一下springboot中tomcat的启动流程 1.找到AbstractApplicationContext方法中refresh方法，这个也是spring的">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/17292bf423c5e45b?w=775&h=591&f=png&s=84221">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/17292dbbaa0800f1?w=626&h=273&f=png&s=71804">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/17292dd89cae7d1f?w=776&h=206&f=png&s=66775">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/17292d2f4d37fa3a?w=641&h=676&f=png&s=395980">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/17292e623e0628a5?w=369&h=185&f=png&s=43974">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/17292b5a97bed0f7?w=828&h=794&f=png&s=107772">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/17292fff4c0b9b69?w=488&h=187&f=png&s=54643">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/17293015b49f8317?w=708&h=253&f=png&s=122115">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/172942f6cbfa79c5?w=838&h=374&f=png&s=82192">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/1729439a49cab68e?w=651&h=202&f=png&s=71164">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/172943fbcb601c2e?w=730&h=319&f=png&s=154090">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/1729446a75245687?w=814&h=256&f=png&s=115194">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/172944ae27218fa9?w=936&h=392&f=png&s=223257">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/172944c0fa9aa467?w=1005&h=486&f=png&s=231065">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/172944e21f6d84d5?w=632&h=429&f=png&s=213428">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/9/17296fcc7a8e7d4d?w=546&h=311&f=png&s=134339">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/17294567b5019b3f?w=595&h=429&f=png&s=171342">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/17294583689b4471?w=620&h=513&f=png&s=198767">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/1729460502e78c04?w=763&h=262&f=png&s=87390">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/8/1729461b4cd2d0b2?w=968&h=478&f=png&s=212475">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/9/17296f7588b58885?w=779&h=270&f=png&s=215573">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/9/1729816cfc6fd349?w=640&h=573&f=png&s=135769">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/9/1729817fbbb0daa3?w=753&h=664&f=png&s=307083">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/9/172981d62c7ee33e?w=777&h=661&f=png&s=297595">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/9/172981f0a9eb392f?w=630&h=455&f=png&s=139115">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/9/17298295c240bf32?w=779&h=495&f=png&s=206085">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/9/172982e2a851d639?w=604&h=66&f=png&s=42320">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/9/172983764f697ad3?w=825&h=528&f=png&s=239082">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/9/172983c110c6d5c1?w=399&h=395&f=png&s=35028">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/9/172983d7ad6a2944?w=812&h=663&f=png&s=266264">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/6/9/172983e8e12a63d1?w=824&h=539&f=png&s=251595">
+<meta property="article:published_time" content="2020-06-04T03:35:08.000Z">
+<meta property="article:modified_time" content="2020-06-09T08:50:52.771Z">
+<meta property="article:author" content="shuaizx">
+<meta property="article:tag" content="tomcat">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/6/8/17292bf423c5e45b?w=775&h=591&f=png&s=84221">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://shuai1763957837.github.io/2020/06/04/浅析springboot中tomcat源码实现/"/>
+
+
+
+
+
+  <title>浅析springboot中tomcat源码实现 | binaryfaker</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?b1184fa1044d00d51aa7f5413396d0ff";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">binaryfaker</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://shuai1763957837.github.io/2020/06/04/%E6%B5%85%E6%9E%90springboot%E4%B8%ADtomcat%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="shuaizx">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/hdImg_9e0cc479c1d3cf63fee27a0bb57814ed1590983454483.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="binaryfaker">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">浅析springboot中tomcat源码实现</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-04T11:35:08+08:00">
+                2020-06-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/06/04/%E6%B5%85%E6%9E%90springboot%E4%B8%ADtomcat%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/04/%E6%B5%85%E6%9E%90springboot%E4%B8%ADtomcat%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/06/04/%E6%B5%85%E6%9E%90springboot%E4%B8%ADtomcat%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0/" class="leancloud_visitors" data-flag-title="浅析springboot中tomcat源码实现">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <meta name="referrer" content="no-referrer" />
+
+<p>tomcat想必大家都非常的了解，在这里就不必介绍，在现在应用的springboot框架，tomcat就被内嵌其中。tomcat是怎么运行起来的？你知道怎么拓展tomcat吗？</p>
+<h2 id="tomcat启动流程"><a href="#tomcat启动流程" class="headerlink" title="tomcat启动流程"></a>tomcat启动流程</h2><hr>
+<h3 id="springboot加载流程"><a href="#springboot加载流程" class="headerlink" title="springboot加载流程"></a>springboot加载流程</h3><p>首先我们看一下springboot中tomcat的启动流程</p>
+<p>1.找到AbstractApplicationContext方法中refresh方法，这个也是spring的启动流程，在refresh方法中，有一个onRefresh()方法，这个方法在spring中是一个空方法，在springboot对这个方法进行了拓展。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">public void refresh() throws BeansException, IllegalStateException &#123;</span><br><span class="line">		synchronized (this.startupShutdownMonitor) &#123;</span><br><span class="line">			&#x2F;&#x2F; Prepare this context for refreshing.</span><br><span class="line">			prepareRefresh();</span><br><span class="line"></span><br><span class="line">			&#x2F;&#x2F; Tell the subclass to refresh the internal bean factory.</span><br><span class="line">			ConfigurableListableBeanFactory beanFactory &#x3D; obtainFreshBeanFactory();</span><br><span class="line"></span><br><span class="line">			&#x2F;&#x2F; Prepare the bean factory for use in this context.</span><br><span class="line">			prepareBeanFactory(beanFactory);</span><br><span class="line"></span><br><span class="line">			try &#123;</span><br><span class="line">				&#x2F;&#x2F; Allows post-processing of the bean factory in context subclasses.</span><br><span class="line">				postProcessBeanFactory(beanFactory);</span><br><span class="line"></span><br><span class="line">				&#x2F;&#x2F; Invoke factory processors registered as beans in the context.</span><br><span class="line">				invokeBeanFactoryPostProcessors(beanFactory);</span><br><span class="line"></span><br><span class="line">				&#x2F;&#x2F; Register bean processors that intercept bean creation.</span><br><span class="line">				registerBeanPostProcessors(beanFactory);</span><br><span class="line"></span><br><span class="line">				&#x2F;&#x2F; Initialize message source for this context.</span><br><span class="line">				initMessageSource();</span><br><span class="line"></span><br><span class="line">				&#x2F;&#x2F; Initialize event multicaster for this context.</span><br><span class="line">				initApplicationEventMulticaster();</span><br><span class="line"></span><br><span class="line">				&#x2F;&#x2F; Initialize other special beans in specific context subclasses.</span><br><span class="line">				onRefresh();</span><br><span class="line"></span><br><span class="line">				&#x2F;&#x2F; Check for listener beans and register them.</span><br><span class="line">				registerListeners();</span><br><span class="line"></span><br><span class="line">				&#x2F;&#x2F; Instantiate all remaining (non-lazy-init) singletons.</span><br><span class="line">				finishBeanFactoryInitialization(beanFactory);</span><br><span class="line"></span><br><span class="line">				&#x2F;&#x2F; Last step: publish corresponding event.</span><br><span class="line">				finishRefresh();</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			catch (BeansException ex) &#123;</span><br><span class="line">				if (logger.isWarnEnabled()) &#123;</span><br><span class="line">					logger.warn(&quot;Exception encountered during context initialization - &quot; +</span><br><span class="line">							&quot;cancelling refresh attempt: &quot; + ex);</span><br><span class="line">				&#125;</span><br><span class="line"></span><br><span class="line">				&#x2F;&#x2F; Destroy already created singletons to avoid dangling resources.</span><br><span class="line">				destroyBeans();</span><br><span class="line"></span><br><span class="line">				&#x2F;&#x2F; Reset &#39;active&#39; flag.</span><br><span class="line">				cancelRefresh(ex);</span><br><span class="line"></span><br><span class="line">				&#x2F;&#x2F; Propagate exception to caller.</span><br><span class="line">				throw ex;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			finally &#123;</span><br><span class="line">				&#x2F;&#x2F; Reset common introspection caches in Spring&#39;s core, since we</span><br><span class="line">				&#x2F;&#x2F; might not ever need metadata for singleton beans anymore...</span><br><span class="line">				resetCommonCaches();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>springboot拓展的onRefresh()方法如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">protected void onRefresh() &#123;</span><br><span class="line">	super.onRefresh();</span><br><span class="line">	try &#123;</span><br><span class="line">		createWebServer();</span><br><span class="line">	&#125;</span><br><span class="line">	catch (Throwable ex) &#123;</span><br><span class="line">		throw new ApplicationContextException(&quot;Unable to start web server&quot;, ex);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>很简单，看方法命名就知道这个创建了一个web容器，默认也就是tomcat容器。</p>
+<p>在creatWebServer()方法中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">private void createWebServer() &#123;</span><br><span class="line">	WebServer webServer &#x3D; this.webServer;</span><br><span class="line">	ServletContext servletContext &#x3D; getServletContext();</span><br><span class="line">	if (webServer &#x3D;&#x3D; null &amp;&amp; servletContext &#x3D;&#x3D; null) &#123;</span><br><span class="line">		ServletWebServerFactory factory &#x3D; getWebServerFactory();</span><br><span class="line">		</span><br><span class="line">		&#x2F;&#x2F;在这里创建了tomcat容器</span><br><span class="line">		this.webServer &#x3D; factory.getWebServer(getSelfInitializer());</span><br><span class="line">	&#125;</span><br><span class="line">	else if (servletContext !&#x3D; null) &#123;</span><br><span class="line">		try &#123;</span><br><span class="line">			getSelfInitializer().onStartup(servletContext);</span><br><span class="line">		&#125;</span><br><span class="line">		catch (ServletException ex) &#123;</span><br><span class="line">			throw new ApplicationContextException(&quot;Cannot initialize servlet context&quot;, ex);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	initPropertySources();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>this.webServer = factory.getWebServer(getSelfInitializer());<br>在这里进行了详细的创建过程，打开这个方法的具体实现，如下就是具体的tomcat的实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public WebServer getWebServer(ServletContextInitializer... initializers) &#123;</span><br><span class="line">	if (this.disableMBeanRegistry) &#123;</span><br><span class="line">		Registry.disableRegistry();</span><br><span class="line">	&#125;</span><br><span class="line">	Tomcat tomcat &#x3D; new Tomcat();</span><br><span class="line">	File baseDir &#x3D; (this.baseDirectory !&#x3D; null) ? this.baseDirectory : createTempDir(&quot;tomcat&quot;);</span><br><span class="line">	tomcat.setBaseDir(baseDir.getAbsolutePath());</span><br><span class="line">	Connector connector &#x3D; new Connector(this.protocol);</span><br><span class="line">	connector.setThrowOnFailure(true);</span><br><span class="line">	tomcat.getService().addConnector(connector);</span><br><span class="line">	customizeConnector(connector);</span><br><span class="line">	tomcat.setConnector(connector);</span><br><span class="line">	tomcat.getHost().setAutoDeploy(false);</span><br><span class="line">	configureEngine(tomcat.getEngine());</span><br><span class="line">	for (Connector additionalConnector : this.additionalTomcatConnectors) &#123;</span><br><span class="line">		tomcat.getService().addConnector(additionalConnector);</span><br><span class="line">	&#125;</span><br><span class="line">	prepareContext(tomcat.getHost(), initializers);</span><br><span class="line">	return getTomcatWebServer(tomcat);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>先看一下tomcat的整体架构</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/17292bf423c5e45b?w=775&h=591&f=png&s=84221" alt=""></p>
+<p>在tomcat中，最外层的就是tomcat，tomcat中有一个server。server中有多个service，<br>每个service可以单独对外服务。</p>
+<p>service中有connector和container两个组件，关系如下</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/17292dbbaa0800f1?w=626&h=273&f=png&s=71804" alt=""></p>
+<p>connector又分为endpoint和processor</p>
+<p>endpoint处理传输层协议，演示版本为nio实现</p>
+<p>processor处理应用层协议，演示版本为http1.1实现</p>
+<p>中间通过适配器模式把request转换成servletRequest</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/17292dd89cae7d1f?w=776&h=206&f=png&s=66775" alt=""></p>
+<p>全tomcat围绕着lifecycle接口进行组件生命周期的维护<br><img src="https://user-gold-cdn.xitu.io/2020/6/8/17292d2f4d37fa3a?w=641&h=676&f=png&s=395980" alt=""></p>
+<p>在lifecycle接口中又有init，start等方法，tomcat初始化和启动就会围绕着这些方法进行实现</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/17292e623e0628a5?w=369&h=185&f=png&s=43974" alt=""></p>
+<p>tomcat流程图就以深入理解java web技术内幕中servlet启动为例</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/17292b5a97bed0f7?w=828&h=794&f=png&s=107772" alt=""></p>
+<p>（ps：需要注意的是网上有很多图是错误的，错误图中标明host和context的init方法在engine init之后启动）</p>
+<p>下面我们详细的了解下tomcat中源码执行的过程</p>
+<p>TomcatWebServer.initialize()方法中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">this.tomcat.start();</span><br></pre></td></tr></table></figure>
+<p>正式开启tomcat的启动流程</p>
+<h3 id="tomcat启动流程-1"><a href="#tomcat启动流程-1" class="headerlink" title="tomcat启动流程"></a>tomcat启动流程</h3><hr>
+<h4 id="init过程"><a href="#init过程" class="headerlink" title="init过程"></a>init过程</h4><p>每一个容器都有自己的标准实现<br>在tomcat中start方法开启server.start();</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/17292fff4c0b9b69?w=488&h=187&f=png&s=54643" alt=""><br>server.start()方法实现为LifecycleBase.start()方法<br>调用init方法</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/17293015b49f8317?w=708&h=253&f=png&s=122115" alt=""></p>
+<p>init方法调用了initInternal()方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public final synchronized void init() throws LifecycleException &#123;</span><br><span class="line">    if (!state.equals(LifecycleState.NEW)) &#123;</span><br><span class="line">        invalidTransition(Lifecycle.BEFORE_INIT_EVENT);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    try &#123;</span><br><span class="line">        setStateInternal(LifecycleState.INITIALIZING, null, false);</span><br><span class="line">        initInternal()</span><br><span class="line">        setStateInternal(LifecycleState.INITIALIZED, null, false);</span><br><span class="line">    &#125; catch (Throwable t) &#123;</span><br><span class="line">        handleSubClassException(t, &quot;lifecycleBase.initFail&quot;, toString());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>initInternal方法为抽象方法，实现为子类的实现，谁调用谁实现，刚才为<br>StandardServer调用的，所有也由它实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">protected abstract void initInternal() throws LifecycleException;</span><br></pre></td></tr></table></figure>
+<p>在这里又用到了一个设计模式</p>
+<p><strong>模版方法模式</strong></p>
+<p>把通用的抽取到父类，子类只关注自己不同的实现即可</p>
+<p>在后面的容器中全部运用了这种模版方法模式<br>包括init  start stop方法等，后面就不在详细描述</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/172942f6cbfa79c5?w=838&h=374&f=png&s=82192" alt=""></p>
+<p>在server标准实现中，StandardServer的initInternal具体实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">        super.initInternal();</span><br><span class="line"></span><br><span class="line">        if (engine !&#x3D; null) &#123;</span><br><span class="line">        &#x2F;&#x2F;1. 对engine的初始化</span><br><span class="line">            engine.init();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; Initialize any Executors</span><br><span class="line">        for (Executor executor : findExecutors()) &#123;</span><br><span class="line">            if (executor instanceof JmxEnabled) &#123;</span><br><span class="line">                ((JmxEnabled) executor).setDomain(getDomain());</span><br><span class="line">            &#125;</span><br><span class="line">            &#x2F;&#x2F;2. 对executor的初始化</span><br><span class="line">            executor.init();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; Initialize mapper listener</span><br><span class="line">        mapperListener.init();</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; Initialize our defined Connectors</span><br><span class="line">        synchronized (connectorsLock) &#123;</span><br><span class="line">            for (Connector connector : connectors) &#123;</span><br><span class="line">            &#x2F;&#x2F;3. 对connector的初始化</span><br><span class="line">                connector.init();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>在service初始化的过程中，主要有三步</p>
+<ul>
+<li>engine的初始化 </li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">engine.init();</span><br></pre></td></tr></table></figure>
+<ul>
+<li>executor的初始化</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">executor.init();</span><br></pre></td></tr></table></figure>
+<ul>
+<li>connector的初始化</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">for (Connector connector : connectors) &#123;</span><br><span class="line">            &#x2F;&#x2F;3. 对connector的初始化</span><br><span class="line">                connector.init();</span><br><span class="line">            &#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>engine的初始化</p>
+<p>在engine初始化中，没有做什么特别的事，最主要的是并没有对后面host的初始化，对网上engine会对host进行初始化的纠正</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/1729439a49cab68e?w=651&h=202&f=png&s=71164" alt=""></p>
+<p>executor的初始化也只是把自己这个组件加载进监控中，本身并没有做任何任何重要的事</p>
+<p>重点看connector的初始化过程</p>
+<p>在connect初始化中，有一个组件叫做protocolHandler：protocolHandler是Coyote协议的接口，通过endpoint和processor实现了对具体协议的处理能力。</p>
+<p>在第二框中加载了具体的CoyoteAdapter实例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">super.initInternal();</span><br><span class="line"></span><br><span class="line">if (protocolHandler &#x3D;&#x3D; null) &#123;</span><br><span class="line">    throw new LifecycleException(</span><br><span class="line">            sm.getString(&quot;coyoteConnector.protocolHandlerInstantiationFailed&quot;));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; Initialize adapter</span><br><span class="line">adapter &#x3D; new CoyoteAdapter(this);</span><br><span class="line">protocolHandler.setAdapter(adapter);</span><br><span class="line">if (service !&#x3D; null) &#123;</span><br><span class="line">    protocolHandler.setUtilityExecutor(service.getServer().getUtilityExecutor());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/172943fbcb601c2e?w=730&h=319&f=png&s=154090" alt=""></p>
+<p>然后进行protocolHandler的初始化</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">protocolHandler.init();</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/1729446a75245687?w=814&h=256&f=png&s=115194" alt=""></p>
+<p>protocolHandler继续对endpoint进行初始化</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">endpoint.init();</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/172944ae27218fa9?w=936&h=392&f=png&s=223257" alt=""></p>
+<p>前面我们说到endpoint是对传输层协议的实现，进去看是否有这样的实现</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/172944c0fa9aa467?w=1005&h=486&f=png&s=231065" alt=""></p>
+<p>bindWithCleanup();方法，里面是bind()方法，具体的实现需要由子类实现，在这里是nio实现</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/172944e21f6d84d5?w=632&h=429&f=png&s=213428" alt=""></p>
+<p>bind里面也就是对socket的初始化和打开，具体可自己观看相应实现</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/9/17296fcc7a8e7d4d?w=546&h=311&f=png&s=134339" alt=""></p>
+<h4 id="start过程"><a href="#start过程" class="headerlink" title="start过程"></a>start过程</h4><p>在上面介绍了init的过程，下面接着介绍start过程</p>
+<p>start一样，也是通过模版方法模式，主要看每个组件的startInternal方法实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">StandardServer.start()</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/17294567b5019b3f?w=595&h=429&f=png&s=171342" alt=""></p>
+<p>循环调用services[i].start()方法</p>
+<p>service标准实现StandardService<br>也是和init方法一样，对engine、exector、connector的start方法进行调用</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/17294583689b4471?w=620&h=513&f=png&s=198767" alt=""></p>
+<p>在engine start方法中，还对host、context、wapper组件进行了初始化</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/1729460502e78c04?w=763&h=262&f=png&s=87390" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/8/1729461b4cd2d0b2?w=968&h=478&f=png&s=212475" alt=""></p>
+<p>exector start方法中对线程池进行了初步的设置，创建了自己的线程工厂，在后续任务中使用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">protected void startInternal() throws LifecycleException &#123;</span><br><span class="line"></span><br><span class="line">    taskqueue &#x3D; new TaskQueue(maxQueueSize);</span><br><span class="line">    TaskThreadFactory tf &#x3D; new TaskThreadFactory(namePrefix,daemon,getThreadPriority());</span><br><span class="line">    executor &#x3D; new ThreadPoolExecutor(getMinSpareThreads(), getMaxThreads(), maxIdleTime, TimeUnit.MILLISECONDS,taskqueue, tf);</span><br><span class="line">    executor.setThreadRenewalDelay(threadRenewalDelay);</span><br><span class="line">    if (prestartminSpareThreads) &#123;</span><br><span class="line">        executor.prestartAllCoreThreads();</span><br><span class="line">    &#125;</span><br><span class="line">    taskqueue.setParent(executor);</span><br><span class="line"></span><br><span class="line">    setState(LifecycleState.STARTING);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Connector.start()调用流程如下</p>
+<p>protocolHandler.start()-&gt;endpoint.start()-&gt;startInternal()交给具体的实现，这里还是nioEndpoint</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/9/17296f7588b58885?w=779&h=270&f=png&s=215573" alt=""></p>
+<p>我们进NioEndpoint start看一下关键点实现</p>
+<p>NioEndpoint start方法中，对执行的线程池进行了创建</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">if (getExecutor() &#x3D;&#x3D; null) &#123;</span><br><span class="line">               createExecutor();</span><br><span class="line">           &#125;</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public void createExecutor() &#123;</span><br><span class="line">        internalExecutor &#x3D; true;</span><br><span class="line">        &#x2F;&#x2F;创建任务队列</span><br><span class="line">        TaskQueue taskqueue &#x3D; new TaskQueue();</span><br><span class="line">        &#x2F;&#x2F;创建线程工厂，并设置成守护线程</span><br><span class="line">        TaskThreadFactory tf &#x3D; new TaskThreadFactory(getName() + &quot;-exec-&quot;, daemon, getThreadPriority());</span><br><span class="line">        &#x2F;&#x2F;创建线程池</span><br><span class="line">        executor &#x3D; new ThreadPoolExecutor(getMinSpareThreads(), getMaxThreads(), 60, TimeUnit.SECONDS,taskqueue, tf);</span><br><span class="line">        taskqueue.setParent( (ThreadPoolExecutor) executor);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看一下里面的具体参数，这也是tomcat对业务线程的默认参数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">getMinSpareThreads()</span><br></pre></td></tr></table></figure>
+<p>里面的实现就是取最大线程和最小空闲线程的最小值，最大线程默认200，最小空闲线程默认10，取得值为10，所以tomcat核心线程默认为10</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">getMaxThreads()</span><br></pre></td></tr></table></figure>
+<p>最大线程默认为200</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">initializeConnectionLatch();</span><br></pre></td></tr></table></figure>
+<p>设置tomcat最大链接10000</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">startAcceptorThread();</span><br></pre></td></tr></table></figure>
+<p>监听socket套接字，由于nio的多路复用机制，所以可以用极少的线程监听大量的socket</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">serverSock.accept();</span><br></pre></td></tr></table></figure>
+
+<p>至此start核心流程基本结束</p>
+<h4 id="servlet运行流程"><a href="#servlet运行流程" class="headerlink" title="servlet运行流程"></a>servlet运行流程</h4><p>在socket监听到客户端信息之后，交由线程池处理<br>执行doRun方法</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/9/1729816cfc6fd349?w=640&h=573&f=png&s=135769" alt=""></p>
+<p>再到processor获取Coyote执行service方法</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/9/1729817fbbb0daa3?w=753&h=664&f=png&s=307083" alt=""></p>
+<p>在coyote中转换request和response参数为servlet的ServletRequest和ServletResponse</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">postParseSuccess &#x3D; postParseRequest(req, request, res, response);</span><br></pre></td></tr></table></figure>
+<p>在postParseRequest方法中对路径进行了查找，找到对应的servlet，里是通过mapper组件完成的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">connector.getService().getMapper().map(serverName, decodedURI,</span><br><span class="line">                    version, request.getMappingData());</span><br></pre></td></tr></table></figure>
+
+<p>把转换成功之后的request和response设置到管道中进行执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">connector.getService().getContainer().getPipeline().getFirst().invoke(</span><br><span class="line">                        request, response);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/9/172981d62c7ee33e?w=777&h=661&f=png&s=297595" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/9/172981f0a9eb392f?w=630&h=455&f=png&s=139115" alt=""></p>
+<p>在管道中也运用了责任链模式，这和filter中是一样的，具体的大家可以单独研究这一块源码<br>每一个pipeline中都有一个大量的Valve，但是只有一个基础Valve<br>基础的Valve一般以容器+StandardValve命名，比如StandardengineValve<br>基础Valve调用下一层的容器阀。如上图所示</p>
+<p>在CoyoteAdapter中开始调用enginePipeline开始</p>
+<p>在engine中又开始吊桶host的第一个Valve</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">host.getPipeline().getFirst().invoke(request, response);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/9/17298295c240bf32?w=779&h=495&f=png&s=206085" alt=""></p>
+<p>接下来的都是如此</p>
+<p>filter和servlet执行流程</p>
+<p>在StandardWrapperValve中开始构建filter链和servlet</p>
+<p>首先在StandardWrapperValve invoke方法中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">servlet &#x3D; wrapper.allocate();</span><br></pre></td></tr></table></figure>
+<p>通过allocate反射获取servlet</p>
+<p>再到</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ApplicationFilterChain filterChain &#x3D;</span><br><span class="line">               ApplicationFilterFactory.createFilterChain(request, wrapper, servlet);</span><br></pre></td></tr></table></figure>
+<p>通过工厂获取filter链</p>
+<p>把servlet设置进filterchain</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/9/172982e2a851d639?w=604&h=66&f=png&s=42320" alt=""></p>
+<p>在filterchain设置filterConfig</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">filterChain.addFilter(filterConfig);</span><br></pre></td></tr></table></figure>
+
+
+<p>循环添加filter</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">void addFilter(ApplicationFilterConfig filterConfig) &#123;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; Prevent the same filter being added multiple times</span><br><span class="line">    for(ApplicationFilterConfig filter:filters)</span><br><span class="line">        if(filter&#x3D;&#x3D;filterConfig)</span><br><span class="line">            return;</span><br><span class="line"></span><br><span class="line">    if (n &#x3D;&#x3D; filters.length) &#123;</span><br><span class="line">        ApplicationFilterConfig[] newFilters &#x3D;</span><br><span class="line">            new ApplicationFilterConfig[n + INCREMENT];</span><br><span class="line">        System.arraycopy(filters, 0, newFilters, 0, n);</span><br><span class="line">        filters &#x3D; newFilters;</span><br><span class="line">    &#125;</span><br><span class="line">    filters[n++] &#x3D; filterConfig;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后执行internalDoFilter方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">internalDoFilter(request,response);</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/9/172983764f697ad3?w=825&h=528&f=png&s=239082" alt=""></p>
+<p>这个时候就真正的开始执行filter和servlet了</p>
+<p>执行filter和servlet的时候，会循环执行filter，直到最后执行servlet</p>
+<p>执行流程大体如此，每次执行filter pos次数+1，执行全部执行，然后开始执行servlet<br><img src="https://user-gold-cdn.xitu.io/2020/6/9/172983c110c6d5c1?w=399&h=395&f=png&s=35028" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/9/172983d7ad6a2944?w=812&h=663&f=png&s=266264" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/6/9/172983e8e12a63d1?w=824&h=539&f=png&s=251595" alt=""></p>
+<p>整个tomcat流程执行完毕</p>
+<h4 id="tomcat涉及到的设计模式"><a href="#tomcat涉及到的设计模式" class="headerlink" title="tomcat涉及到的设计模式"></a>tomcat涉及到的设计模式</h4><p>当然tomcat细节远远不止如此，详细讲解可以出一本书，有兴趣的可以去了解下，tomcat中包含了特别多的设计模式<br>比如</p>
+<ul>
+<li>观察者模式，tomcat中对组件的监听都是基于观察者模式进行的</li>
+<li>模版方法模式，基本上全篇都是模版方法模式，在业务上我们也是常用这个模式</li>
+<li>适配器模式：在request转换到servletRequest的过程中，就使用了CoyoteAdapter进行了适配</li>
+<li>责任链模式：在tomcat中，pipeline和Valve组合，filter都是责任链模式的具体实现</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/tomcat/" rel="tag"># tomcat</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/01/crash-safe%EF%BC%8Credo-log%E5%92%8Cbinlog%E4%BD%A0%E9%9C%80%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E7%9F%A5%E8%AF%86/" rel="next" title="crash-safe，redo log和binlog你需要了解这些知识">
+                <i class="fa fa-chevron-left"></i> crash-safe，redo log和binlog你需要了解这些知识
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/06/04/java-spi%E7%AC%AC%E4%B8%80%E7%AB%A0-JDBC%E6%8E%A5%E5%8F%A3%E6%80%8E%E4%B9%88%E5%8A%A0%E8%BD%BD%E8%87%AA%E5%B7%B1%E7%9A%84%E5%AE%9E%E7%8E%B0%E7%B1%BB/" rel="prev" title="java spi第一章:JDBC接口怎么加载自己的实现类">
+                java spi第一章:JDBC接口怎么加载自己的实现类 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/hdImg_9e0cc479c1d3cf63fee27a0bb57814ed1590983454483.jpg"
+                alt="shuaizx" />
+            
+              <p class="site-author-name" itemprop="name">shuaizx</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#tomcat启动流程"><span class="nav-number">1.</span> <span class="nav-text">tomcat启动流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#springboot加载流程"><span class="nav-number">1.1.</span> <span class="nav-text">springboot加载流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tomcat启动流程-1"><span class="nav-number">1.2.</span> <span class="nav-text">tomcat启动流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#init过程"><span class="nav-number">1.2.1.</span> <span class="nav-text">init过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#start过程"><span class="nav-number">1.2.2.</span> <span class="nav-text">start过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#servlet运行流程"><span class="nav-number">1.2.3.</span> <span class="nav-text">servlet运行流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tomcat涉及到的设计模式"><span class="nav-number">1.2.4.</span> <span class="nav-text">tomcat涉及到的设计模式</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">shuaizx</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: '1RtaFeL1X2iHoDB2lwtYnEeI-gzGzoHsz',
+        appKey: 'bb4x5BHK2OkQrnvbt3VuWUgm',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("1RtaFeL1X2iHoDB2lwtYnEeI-gzGzoHsz", "bb4x5BHK2OkQrnvbt3VuWUgm");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

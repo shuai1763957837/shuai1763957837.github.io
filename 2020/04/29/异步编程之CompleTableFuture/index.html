@@ -79,12 +79,12 @@
 
 
 
-<meta name="description" content="所谓异步调用其实就是实现一个可无需等待被调用函数的返回值而让操作继续运行的方法。在 Java 语言中，简单的讲就是另启一个线程来完成调用中的部分计算，使调用继续运行或返回，而不需要等待计算结果。但调用者仍需要取线程的计算结果。  在并发时代，我们常用多线程来进行异步编程，但是多线程有一个缺点，就是不容易获取线程执行后的值，尽管用一些奇招可以获取，但是这已经远离了我们的初衷。java 1.5提供了一">
+<meta name="description" content="所谓异步调用其实就是实现一个可无需等待被调用函数的返回值而让操作继续运行的方法。在 Java 语言中，简单的讲就是另启一个线程来完成调用中的部分计算，使调用继续运行或返回，而不需要等待计算结果。但调用者仍需要取线程的计算结果。  在并发时代，我们常用多线程来进行异步编程，但是多线程有一个缺点，就是不容易获取线程执行后的值，尽管用一些奇招可以获取，但是这已经远离了我们的初衷。java 1.5提供">
 <meta property="og:type" content="article">
 <meta property="og:title" content="异步编程之CompleTableFuture">
 <meta property="og:url" content="https://shuai1763957837.github.io/2020/04/29/%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E4%B9%8BCompleTableFuture/index.html">
 <meta property="og:site_name" content="binaryfaker">
-<meta property="og:description" content="所谓异步调用其实就是实现一个可无需等待被调用函数的返回值而让操作继续运行的方法。在 Java 语言中，简单的讲就是另启一个线程来完成调用中的部分计算，使调用继续运行或返回，而不需要等待计算结果。但调用者仍需要取线程的计算结果。  在并发时代，我们常用多线程来进行异步编程，但是多线程有一个缺点，就是不容易获取线程执行后的值，尽管用一些奇招可以获取，但是这已经远离了我们的初衷。java 1.5提供了一">
+<meta property="og:description" content="所谓异步调用其实就是实现一个可无需等待被调用函数的返回值而让操作继续运行的方法。在 Java 语言中，简单的讲就是另启一个线程来完成调用中的部分计算，使调用继续运行或返回，而不需要等待计算结果。但调用者仍需要取线程的计算结果。  在并发时代，我们常用多线程来进行异步编程，但是多线程有一个缺点，就是不容易获取线程执行后的值，尽管用一些奇招可以获取，但是这已经远离了我们的初衷。java 1.5提供">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/1720976ad6f6652e?w=724&h=448&f=png&s=159603">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/1720977a0c991e68?w=772&h=497&f=png&s=251163">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/12/172095b7e1473930?w=739&h=390&f=png&s=140126">
@@ -107,7 +107,7 @@
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/21/172367bf6f057c01?w=782&h=577&f=png&s=196795">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/5/21/17236816d40c3f78?w=682&h=423&f=png&s=156455">
 <meta property="article:published_time" content="2020-04-29T04:08:00.000Z">
-<meta property="article:modified_time" content="2020-06-01T03:46:20.372Z">
+<meta property="article:modified_time" content="2020-06-08T15:44:17.910Z">
 <meta property="article:author" content="shuaizx">
 <meta property="article:tag" content="java基础">
 <meta name="twitter:card" content="summary">
@@ -394,7 +394,9 @@
       
 
       
-        <p>所谓异步调用其实就是实现一个可无需等待被调用函数的返回值而让操作继续运行的方法。在 Java 语言中，简单的讲就是另启一个线程来完成调用中的部分计算，使调用继续运行或返回，而不需要等待计算结果。但调用者仍需要取线程的计算结果。</p>
+        <meta name="referrer" content="no-referrer" />
+
+<p>所谓异步调用其实就是实现一个可无需等待被调用函数的返回值而让操作继续运行的方法。在 Java 语言中，简单的讲就是另启一个线程来完成调用中的部分计算，使调用继续运行或返回，而不需要等待计算结果。但调用者仍需要取线程的计算结果。</p>
 <hr>
 <p>在并发时代，我们常用多线程来进行异步编程，但是多线程有一个缺点，就是不容易获取线程执行后的值，尽管用一些奇招可以获取，但是这已经远离了我们的初衷。java 1.5提供了一个future接口,可以对线程中的执行状态进行cancle，判断isCancelled，isDone。利用多线程来获取异步执行后的值，但是也有着诸多的缺点，比如</p>
 <ol>

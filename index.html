@@ -497,9 +497,11 @@
       
         
           
-          starter背景
+          
+
+starter背景
 在第一章中，已经简单的介绍了java spi以及spi的用法以及优缺点。那spring中是否有用到spi机制呢？我们如何自定义一个starter呢？
-我们先简单的定义一个springboot版 starter在sprin
+我们先简单的定义一个springboot版 starter在spr
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -646,8 +648,10 @@
       
         
           
-          什么是spi，全称为 Service Provider Interface，是java的一种服务发现机制。
-当服务的提供者提供了相应的实现之后，我们只需要在jar包的META-INF/services/目录里同时创建一个以服务接口命名的文件
+          
+
+spi的定义什么是spi，全称为 Service Provider Interface，是java的一种服务发现机制。
+当服务的提供者提供了相应的实现之后，我们只需要在jar包的META-INF/services/目录里同时创建一个以服
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -702,7 +706,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://shuai1763957837.github.io/2020/06/04/tomcat%E6%BA%90%E7%A0%81%E7%AC%AC%E4%B8%80%E7%AB%A0-tomcat%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">
+    <link itemprop="mainEntityOfPage" href="https://shuai1763957837.github.io/2020/06/04/%E6%B5%85%E6%9E%90springboot%E4%B8%ADtomcat%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="shuaizx">
@@ -721,7 +725,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/06/04/tomcat%E6%BA%90%E7%A0%81%E7%AC%AC%E4%B8%80%E7%AB%A0-tomcat%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url">tomcat源码第一章:tomcat设计模式</a></h1>
+                <a class="post-title-link" href="/2020/06/04/%E6%B5%85%E6%9E%90springboot%E4%B8%ADtomcat%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0/" itemprop="url">浅析springboot中tomcat源码实现</a></h1>
         
 
         <div class="post-meta">
@@ -752,8 +756,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/06/04/tomcat%E6%BA%90%E7%A0%81%E7%AC%AC%E4%B8%80%E7%AB%A0-tomcat%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/04/tomcat%E6%BA%90%E7%A0%81%E7%AC%AC%E4%B8%80%E7%AB%A0-tomcat%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="commentCount"></span>
+                <a href="/2020/06/04/%E6%B5%85%E6%9E%90springboot%E4%B8%ADtomcat%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/04/%E6%B5%85%E6%9E%90springboot%E4%B8%ADtomcat%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -761,7 +765,7 @@
 
           
           
-             <span id="/2020/06/04/tomcat%E6%BA%90%E7%A0%81%E7%AC%AC%E4%B8%80%E7%AB%A0-tomcat%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" class="leancloud_visitors" data-flag-title="tomcat源码第一章:tomcat设计模式">
+             <span id="/2020/06/04/%E6%B5%85%E6%9E%90springboot%E4%B8%ADtomcat%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0/" class="leancloud_visitors" data-flag-title="浅析springboot中tomcat源码实现">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -794,13 +798,15 @@
       
         
           
-          tomcat源码博大精深，里面也涉及到了很多不同的设计模式，下面浅析tomcat中的几个经典的设计模式
-1.模版方法模式
-
           
+
+tomcat想必大家都非常的了解，在这里就不必介绍，在现在应用的springboot框架，tomcat就被内嵌其中。tomcat是怎么运行起来的？你知道怎么拓展tomcat吗？
+tomcat启动流程
+springboot加载流程首先我们
+          ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/06/04/tomcat%E6%BA%90%E7%A0%81%E7%AC%AC%E4%B8%80%E7%AB%A0-tomcat%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/#more" rel="contents">
+            <a class="btn" href="/2020/06/04/%E6%B5%85%E6%9E%90springboot%E4%B8%ADtomcat%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -965,12 +971,14 @@
       
         
           
-          当系统宕机了怎么办，数据怎么恢复的？innodb引擎怎么实现crash-safe的，想要了解这些问题的答案，redo log（重做日志）和binlog（归档日志）你必须了解。
+          
+
+当系统宕机了怎么办，数据怎么恢复的？innodb引擎怎么实现crash-safe的，想要了解这些问题的答案，redo log（重做日志）和binlog（归档日志）你必须了解。
 
 我们先来看一条更新语句的执行过程
 解释一下相关流程
 
-sql经
+sq
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -1139,10 +1147,12 @@ sql经
       
         
           
-          在传统对象分配当中，通常在堆上进行对象实例的分配，但是随着JIT编译器的发展和逃逸分析技术的成熟，在栈上分配内存也不那么绝对了。下面简单介绍逃逸分析、栈上分配、标量替换和锁消除
+          
+
+在传统对象分配当中，通常在堆上进行对象实例的分配，但是随着JIT编译器的发展和逃逸分析技术的成熟，在栈上分配内存也不那么绝对了。下面简单介绍逃逸分析、栈上分配、标量替换和锁消除
 
 逃逸分析
-hotSpot虚拟机可以利用相应算法，判断对象是否
+hotSpot虚拟机可以利用相应算法，判断对象
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -1311,8 +1321,10 @@ hotSpot虚拟机可以利用相应算法，判断对象是否
       
         
           
-          在多线程环境下，比如在spring容器类中定义的变量，如何防止自己的变量被其它线程篡改。想要解决这个问题，不得不提到一个类：ThreadLocal
-ThreadLocal的业务场景是什么？我们怎么用好这个类？你知道ThreadLocal的内
+          
+
+在多线程环境下，比如在spring容器类中定义的变量，如何防止自己的变量被其它线程篡改。想要解决这个问题，不得不提到一个类：ThreadLocal
+ThreadLocal的业务场景是什么？我们怎么用好这个类？你知道ThreadLocal
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -1481,9 +1493,11 @@ ThreadLocal的业务场景是什么？我们怎么用好这个类？你知道Thr
       
         
           
-          所谓异步调用其实就是实现一个可无需等待被调用函数的返回值而让操作继续运行的方法。在 Java 语言中，简单的讲就是另启一个线程来完成调用中的部分计算，使调用继续运行或返回，而不需要等待计算结果。但调用者仍需要取线程的计算结果。
+          
 
-在并发时代
+所谓异步调用其实就是实现一个可无需等待被调用函数的返回值而让操作继续运行的方法。在 Java 语言中，简单的讲就是另启一个线程来完成调用中的部分计算，使调用继续运行或返回，而不需要等待计算结果。但调用者仍需要取线程的计算结果。
+
+在并发
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -1652,10 +1666,12 @@ ThreadLocal的业务场景是什么？我们怎么用好这个类？你知道Thr
       
         
           
-          什么是索引，为什么要索引，这是熟悉数据库必不可少的知识。简单的来说，索引就是利用合理的数据结构来提高查询数据的效率。让我们通过这种数据结构而快速的找到我们想要的数据。
+          
+
+什么是索引，为什么要索引，这是熟悉数据库必不可少的知识。简单的来说，索引就是利用合理的数据结构来提高查询数据的效率。让我们通过这种数据结构而快速的找到我们想要的数据。
 常见的索引模型
 
-从数据结构来说有B+树索引、hash索引、FULLTE
+从数据结构来说有B+树索引、hash索引、FULL
           ...
           <!--noindex-->
           <div class="post-button text-center">

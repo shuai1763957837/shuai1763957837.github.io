@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="什么是spi，全称为 Service Provider Interface，是java的一种服务发现机制。 当服务的提供者提供了相应的实现之后，我们只需要在jar包的META-INF&#x2F;services&#x2F;目录里同时创建一个以服务接口命名的文件。文件内就是实现类的全路径，这样就ServiceLoader加载时就可以通过反射加载具体的实现，完成模块的注入。 下面举一个列子： 我们先定义一个接口： 123">
+<meta name="description" content="spi的定义什么是spi，全称为 Service Provider Interface，是java的一种服务发现机制。 当服务的提供者提供了相应的实现之后，我们只需要在jar包的META-INF&#x2F;services&#x2F;目录里同时创建一个以服务接口命名的文件。文件内就是实现类的全路径，这样就ServiceLoader加载时就可以通过反射加载具体的实现，完成模块的注入。 下面举一个列子： 我们先定义一">
 <meta property="og:type" content="article">
 <meta property="og:title" content="java spi第一章:JDBC接口怎么加载自己的实现类">
 <meta property="og:url" content="https://shuai1763957837.github.io/2020/06/04/java-spi%E7%AC%AC%E4%B8%80%E7%AB%A0-JDBC%E6%8E%A5%E5%8F%A3%E6%80%8E%E4%B9%88%E5%8A%A0%E8%BD%BD%E8%87%AA%E5%B7%B1%E7%9A%84%E5%AE%9E%E7%8E%B0%E7%B1%BB/index.html">
 <meta property="og:site_name" content="binaryfaker">
-<meta property="og:description" content="什么是spi，全称为 Service Provider Interface，是java的一种服务发现机制。 当服务的提供者提供了相应的实现之后，我们只需要在jar包的META-INF&#x2F;services&#x2F;目录里同时创建一个以服务接口命名的文件。文件内就是实现类的全路径，这样就ServiceLoader加载时就可以通过反射加载具体的实现，完成模块的注入。 下面举一个列子： 我们先定义一个接口： 123">
+<meta property="og:description" content="spi的定义什么是spi，全称为 Service Provider Interface，是java的一种服务发现机制。 当服务的提供者提供了相应的实现之后，我们只需要在jar包的META-INF&#x2F;services&#x2F;目录里同时创建一个以服务接口命名的文件。文件内就是实现类的全路径，这样就ServiceLoader加载时就可以通过反射加载具体的实现，完成模块的注入。 下面举一个列子： 我们先定义一">
 <meta property="og:image" content="https://tvax3.sinaimg.cn/large/006EuVaagy1gflaap1lllj30ls0dd77e.jpg">
 <meta property="og:image" content="https://tva1.sinaimg.cn/large/006EuVaagy1gflaabfjqrj30v80avq78.jpg">
 <meta property="og:image" content="https://tvax2.sinaimg.cn/large/006EuVaagy1gflaba9j23j313y09ln27.jpg">
 <meta property="article:published_time" content="2020-06-04T13:53:23.000Z">
-<meta property="article:modified_time" content="2020-06-08T15:13:49.715Z">
+<meta property="article:modified_time" content="2020-06-08T15:43:44.175Z">
 <meta property="article:author" content="shuaizx">
 <meta property="article:tag" content="java基础">
 <meta name="twitter:card" content="summary">
@@ -354,7 +354,9 @@
       
 
       
-        <p>什么是spi，全称为 Service Provider Interface，是java的一种服务发现机制。</p>
+        <meta name="referrer" content="no-referrer" />
+
+<h3 id="spi的定义"><a href="#spi的定义" class="headerlink" title="spi的定义"></a>spi的定义</h3><p>什么是spi，全称为 Service Provider Interface，是java的一种服务发现机制。</p>
 <p>当服务的提供者提供了相应的实现之后，我们只需要在jar包的META-INF/services/目录里同时创建一个以服务接口命名的文件。文件内就是实现类的全路径，这样就ServiceLoader加载时就可以通过反射加载具体的实现，完成模块的注入。</p>
 <p>下面举一个列子：</p>
 <p>我们先定义一个接口：</p>
@@ -383,7 +385,7 @@
 <li>在META-INF/services/建立接口的全限定名，并且在里面输入实现类</li>
 <li>使用ServiceLoader.load(Class&lt;&gt; service)加载接口类，输出相应的实现</li>
 </ul>
-<p>ServiceLoader实现原理：</p>
+<h3 id="spi的实现原理"><a href="#spi的实现原理" class="headerlink" title="spi的实现原理"></a>spi的实现原理</h3><p>ServiceLoader实现原理：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">public void reload() &#123;</span><br><span class="line">    providers.clear();</span><br><span class="line">    lookupIterator &#x3D; new LazyIterator(service, loader);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private ServiceLoader(Class&lt;S&gt; svc, ClassLoader cl) &#123;</span><br><span class="line">    service &#x3D; Objects.requireNonNull(svc, &quot;Service interface cannot be null&quot;);</span><br><span class="line">    loader &#x3D; (cl &#x3D;&#x3D; null) ? ClassLoader.getSystemClassLoader() : cl;</span><br><span class="line">    acc &#x3D; (System.getSecurityManager() !&#x3D; null) ? AccessController.getContext() : null;</span><br><span class="line">    reload();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>在ServiceLoader.load(Class&lt;&gt; service) 方法中，只是对一个初始值的设置</p>
@@ -470,7 +472,7 @@ public class Driver extends NonRegisteringDriver implements java.sql.Driver {
 <p><strong>ClassLoader cl = Thread.currentThread().getContextClassLoader();</strong></p>
 <p>这个没有，在初始化的时候，获取到当前线程的类加载器实现加载过程，在后面加载类的时候，通过cl中的类加载器进行加载，在DriverManager中用的是启动类加载器，所以在这个地方也是启动类加载加载的Driver的实现类。<br>在深入理解java虚拟机中提到了这一点，破坏了双亲委派模型。启动类加载器本不应该认识这些代码，现在用一种取巧的方法获取到这些代码。进行了逆向加载。</p>
 <hr>
-<p>java spi存在的问题：</p>
+<h3 id="spi的问题"><a href="#spi的问题" class="headerlink" title="spi的问题"></a>spi的问题</h3><p>java spi存在的问题：</p>
 <ol>
 <li>第一就是有些时候我想要对单个实现类进行获取，比如key，value的形式，但是java spi并不提供这种操作。</li>
 <li>每次对ServiceLoader进行操作的时候，都会进行重新加载，实现类通常是无状态的，是否可以存储到spring这样的容器中</li>
@@ -507,8 +509,8 @@ public class Driver extends NonRegisteringDriver implements java.sql.Driver {
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2020/06/04/tomcat%E6%BA%90%E7%A0%81%E7%AC%AC%E4%B8%80%E7%AB%A0-tomcat%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="next" title="tomcat源码第一章:tomcat设计模式">
-                <i class="fa fa-chevron-left"></i> tomcat源码第一章:tomcat设计模式
+              <a href="/2020/06/04/%E6%B5%85%E6%9E%90springboot%E4%B8%ADtomcat%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0/" rel="next" title="浅析springboot中tomcat源码实现">
+                <i class="fa fa-chevron-left"></i> 浅析springboot中tomcat源码实现
               </a>
             
           </div>
@@ -580,8 +582,17 @@ public class Driver extends NonRegisteringDriver implements java.sql.Driver {
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -645,6 +656,22 @@ public class Driver extends NonRegisteringDriver implements java.sql.Driver {
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#spi的定义"><span class="nav-number">1.</span> <span class="nav-text">spi的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#spi的实现原理"><span class="nav-number">2.</span> <span class="nav-text">spi的实现原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#spi的问题"><span class="nav-number">3.</span> <span class="nav-text">spi的问题</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
