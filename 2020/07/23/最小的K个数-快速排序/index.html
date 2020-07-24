@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="算法," />
 
 
 
@@ -79,12 +79,19 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="binaryfaker">
-<meta property="og:url" content="https://shuai1763957837.github.io/tags/tomcat/index.html">
+<meta name="description" content="最小的K个数，最大的K个数等需要进行排序的，都可以用到分治的思想，利用快排快速解决 1.快速排序思想  快速排序由C. A. R. Hoare在1960年提出。它的基本思想是：通过一趟排序将要排序的数据分割成独立的两部分，其中一部分的所有数据都比另外一部分的所有数据都要小，然后再按此方法对这两部分数据分别进行快速排序，整个排序过程可以递归进行，以此达到整个数据变成有序序列。  举一个例子： 对 3">
+<meta property="og:type" content="article">
+<meta property="og:title" content="最小的K个数-快速排序">
+<meta property="og:url" content="https://shuai1763957837.github.io/2020/07/23/%E6%9C%80%E5%B0%8F%E7%9A%84K%E4%B8%AA%E6%95%B0-%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/index.html">
 <meta property="og:site_name" content="binaryfaker">
+<meta property="og:description" content="最小的K个数，最大的K个数等需要进行排序的，都可以用到分治的思想，利用快排快速解决 1.快速排序思想  快速排序由C. A. R. Hoare在1960年提出。它的基本思想是：通过一趟排序将要排序的数据分割成独立的两部分，其中一部分的所有数据都比另外一部分的所有数据都要小，然后再按此方法对这两部分数据分别进行快速排序，整个排序过程可以递归进行，以此达到整个数据变成有序序列。  举一个例子： 对 3">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/7/22/17375a851d6a54d5?w=782&h=682&f=png&s=77721">
+<meta property="article:published_time" content="2020-07-23T08:22:20.000Z">
+<meta property="article:modified_time" content="2020-07-23T08:23:25.009Z">
 <meta property="article:author" content="shuaizx">
+<meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/7/22/17375a851d6a54d5?w=782&h=682&f=png&s=77721">
 
 
 
@@ -114,13 +121,13 @@
 
 
 
-  <link rel="canonical" href="https://shuai1763957837.github.io/tags/tomcat/"/>
+  <link rel="canonical" href="https://shuai1763957837.github.io/2020/07/23/最小的K个数-快速排序/"/>
 
 
 
 
 
-  <title>标签: tomcat | binaryfaker</title>
+  <title>最小的K个数-快速排序 | binaryfaker</title>
   
 
 
@@ -149,7 +156,7 @@
     
   
 
-  <div class="container sidebar-position-left ">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -243,54 +250,194 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block tag">
+  <div id="posts" class="posts-expand">
+    
 
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>tomcat<small>标签</small>
-        </h1>
-      </div>
+  
 
-      
-        
+  
+  
+  
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://shuai1763957837.github.io/2020/07/23/%E6%9C%80%E5%B0%8F%E7%9A%84K%E4%B8%AA%E6%95%B0-%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="shuaizx">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/hdImg_9e0cc479c1d3cf63fee27a0bb57814ed1590983454483.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="binaryfaker">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/2020/06/04/%E6%B5%85%E6%9E%90springboot%E4%B8%ADtomcat%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0/" itemprop="url">
-              
-                <span itemprop="name">浅析springboot中tomcat源码实现</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">最小的K个数-快速排序</h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2020-06-04T11:35:08+08:00"
-              content="2020-06-04" >
-          06-04
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-23T16:22:20+08:00">
+                2020-07-23
+              </time>
+            
 
-    </header>
-  </article>
+            
 
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/07/23/%E6%9C%80%E5%B0%8F%E7%9A%84K%E4%B8%AA%E6%95%B0-%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/07/23/%E6%9C%80%E5%B0%8F%E7%9A%84K%E4%B8%AA%E6%95%B0-%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/07/23/%E6%9C%80%E5%B0%8F%E7%9A%84K%E4%B8%AA%E6%95%B0-%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/" class="leancloud_visitors" data-flag-title="最小的K个数-快速排序">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最小的K个数，最大的K个数等需要进行排序的，都可以用到分治的思想，利用快排快速解决</p>
+<p>1.快速排序思想</p>
+<blockquote>
+<p>快速排序由C. A. R. Hoare在1960年提出。它的基本思想是：通过一趟排序将要排序的数据分割成独立的两部分，其中一部分的所有数据都比另外一部分的所有数据都要小，然后再按此方法对这两部分数据分别进行快速排序，整个排序过程可以递归进行，以此达到整个数据变成有序序列。</p>
+</blockquote>
+<p>举一个例子：</p>
+<p>对 3, 5, 1, 4, 2, 6进行快速排序</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/7/22/17375a851d6a54d5?w=782&h=682&f=png&s=77721" alt=""></p>
+<p>在第一次排序的时候，把待比较的值存储在临时空间中，初始值i为最左边的值，j为最右边的值</p>
+<p>因为临时变量储存的是最左边的值，所以需要先从右向左进行遍历，否则右边的值会被覆盖。</p>
+<p>从右向左找到第一个比temp小的值，位置为j，如第二行j=4时，arr[j]=2,替换a[i]的值。如第二行2，5，1，4，2，6</p>
+<p>从左向右找到第一个比temp大的值，位置为i，如第三行i=1时，arr[i]=5,替换a[j]的值。因为在上一次操作中已经替换到a[i].结果如第三行。<br>继续如上操作，直到最后一次i=j时，temp替换掉arr[i]的，形成<br>2，1，3，4，5，6的临时有序数组。<br>对所有的子序列进行如上操作，即可达到全局有序。</p>
+<p>最好时间复杂度O(nlogn),当所有的基准值为最小值时,最坏时间复杂度为O(N*N)。对于基准值的选择，最优选择则是把数组恰好二分，不过这只是理想状态，可以对首中尾取平均值进行基准的选择。</p>
+<p>空间复杂度为存储栈的空间O(logn)</p>
+<h3 id="快速排序代码实现"><a href="#快速排序代码实现" class="headerlink" title="快速排序代码实现"></a>快速排序代码实现</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">public void quickSort(int[] arr,int left,int right)&#123;</span><br><span class="line">        if(left&lt;right)&#123;</span><br><span class="line">            int i&#x3D;left;</span><br><span class="line">            int j&#x3D;right;</span><br><span class="line">            int temp&#x3D;arr[left];</span><br><span class="line">            while(i&lt;j)&#123;</span><br><span class="line">                while(i&lt;j&amp;&amp;arr[j]&gt;&#x3D;temp)&#123;</span><br><span class="line">                    j--;</span><br><span class="line">                &#125;</span><br><span class="line">                arr[i]&#x3D;arr[j];</span><br><span class="line">                while(i&lt;j&amp;&amp;arr[i]&lt;temp)&#123;</span><br><span class="line">                    i++;</span><br><span class="line">                &#125;</span><br><span class="line">                arr[j]&#x3D;arr[i];</span><br><span class="line">            &#125;</span><br><span class="line">            arr[i]&#x3D;temp;</span><br><span class="line">            quickSort(arr,left,i-1);</span><br><span class="line">            quickSort(arr,i+1,right);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>快速排序其实就是一个分治的思想：<br>对所有的子序列进行递归处理，所有的子序列排序，则全局有序</p>
+<h3 id="最小的K个数解答"><a href="#最小的K个数解答" class="headerlink" title="最小的K个数解答"></a>最小的K个数解答</h3><p>如果运用了快速排序解决了数组有序性问题，则最小的K个数则是前k个数的数组集合</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public int[] getLeastNumbers(int[] arr, int k) &#123;</span><br><span class="line">    if(arr.length&#x3D;&#x3D;0||k&#x3D;&#x3D;0)&#123;</span><br><span class="line">        return new int[]&#123;&#125;;</span><br><span class="line">    &#125;</span><br><span class="line">    quickSort(arr,0,arr.length-1);</span><br><span class="line">    int[] res&#x3D;new int[k];</span><br><span class="line">    System.arraycopy(arr,0,res,0,k);</span><br><span class="line">    return res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>核心则还是快速排序。</p>
+<p>当然对于这个最小K个数，只需要排序到K这个位置即可，对于K之后的位置无需排序。所以可以利用快排思想，找到K位置的基准值，返回之前的数组即可。</p>
 
       
     </div>
+    
+    
+    
 
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/07/23/java-System-currentTimeMillis-%E5%92%8CSystem-nanoTime-%E7%9A%84%E8%A6%81%E7%82%B9%E5%92%8C%E5%8E%9F%E7%90%86/" rel="next" title="java System.currentTimeMillis()和System.nanoTime()的要点和原理">
+                <i class="fa fa-chevron-left"></i> java System.currentTimeMillis()和System.nanoTime()的要点和原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
 
 
           </div>
@@ -298,6 +445,13 @@
 
 
           
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
 
         </div>
         
@@ -318,8 +472,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -383,6 +546,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#快速排序代码实现"><span class="nav-number">1.</span> <span class="nav-text">快速排序代码实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#最小的K个数解答"><span class="nav-number">2.</span> <span class="nav-text">最小的K个数解答</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -523,6 +702,10 @@
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
